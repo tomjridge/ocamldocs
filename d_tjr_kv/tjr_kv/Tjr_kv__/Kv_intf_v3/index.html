@@ -10,26 +10,30 @@
   <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>a<span style="color: #666666">]</span> set_once <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
     <span style="color: #008000; font-weight: bold">method</span> set<span style="color: #666666">:</span> <span style="color: #008000; font-weight: bold">&#39;</span>a <span style="color: #666666">-&gt;</span> <span style="color: #B00040">unit</span>
     <span style="color: #008000; font-weight: bold">method</span> get<span style="color: #666666">:</span> <span style="color: #B00040">unit</span> <span style="color: #666666">-&gt;</span> <span style="color: #008000; font-weight: bold">&#39;</span>a
+    <span style="color: #008000; font-weight: bold">method</span> is_set<span style="color: #666666">:</span> <span style="color: #B00040">bool</span>
   <span style="color: #008000; font-weight: bold">end</span>
 
   <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>a<span style="color: #666666">]</span> mutable_ <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
     <span style="color: #008000; font-weight: bold">method</span> set<span style="color: #666666">:</span> <span style="color: #008000; font-weight: bold">&#39;</span>a <span style="color: #666666">-&gt;</span> <span style="color: #B00040">unit</span>
     <span style="color: #008000; font-weight: bold">method</span> get<span style="color: #666666">:</span> <span style="color: #B00040">unit</span> <span style="color: #666666">-&gt;</span> <span style="color: #008000; font-weight: bold">&#39;</span>a
+    <span style="color: #008000; font-weight: bold">method</span> is_set<span style="color: #666666">:</span> <span style="color: #B00040">bool</span>
   <span style="color: #008000; font-weight: bold">end</span>
 
-  <span style="color: #408080; font-style: italic">(** The initialized method checks that all the state parts of a</span>
-<span style="color: #408080; font-style: italic">     component are initialized; use with assert *)</span>
-  <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>a<span style="color: #666666">]</span> syncable <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
-    <span style="color: #008000; font-weight: bold">method</span> blk_dev_ops    <span style="color: #666666">:</span> <span style="color: #666666">(</span>blk_id<span style="color: #666666">,</span>blk<span style="color: #666666">,</span>t<span style="color: #666666">)</span>blk_dev_ops set_once
-    <span style="color: #008000; font-weight: bold">method</span> blk_id         <span style="color: #666666">:</span> blk_id set_once
-    <span style="color: #008000; font-weight: bold">method</span> contents       <span style="color: #666666">:</span> <span style="color: #008000; font-weight: bold">&#39;</span>a mutable_
+  <span style="color: #408080; font-style: italic">(** This is a container for a type &#39;a that can be stored in a single</span>
+<span style="color: #408080; font-style: italic">     block. The initialized method checks that all the state parts of</span>
+<span style="color: #408080; font-style: italic">     a component are initialized; use with assert *)</span>
+  <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>a<span style="color: #666666">]</span> on_disk_block <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
+    <span style="color: #008000; font-weight: bold">val</span> blk_dev_ops    <span style="color: #666666">:</span> <span style="color: #666666">(</span>blk_id<span style="color: #666666">,</span>blk<span style="color: #666666">,</span>t<span style="color: #666666">)</span>blk_dev_ops set_once
+    <span style="color: #008000; font-weight: bold">val</span> blk_id         <span style="color: #666666">:</span> blk_id set_once
+    <span style="color: #008000; font-weight: bold">val</span> contents       <span style="color: #666666">:</span> <span style="color: #008000; font-weight: bold">&#39;</span>a mutable_
+    <span style="color: #008000; font-weight: bold">val</span> marshaller     <span style="color: #666666">:</span> <span style="color: #008000; font-weight: bold">&#39;</span>a mrshlr set_once
     <span style="color: #008000; font-weight: bold">method</span> sync_to_disk   <span style="color: #666666">:</span> <span style="color: #B00040">unit</span> <span style="color: #666666">-&gt;</span> <span style="color: #666666">(</span><span style="color: #B00040">unit</span><span style="color: #666666">,</span>t<span style="color: #666666">)</span>m
     <span style="color: #008000; font-weight: bold">method</span> sync_from_disk <span style="color: #666666">:</span> <span style="color: #B00040">unit</span> <span style="color: #666666">-&gt;</span> <span style="color: #666666">(</span><span style="color: #B00040">unit</span><span style="color: #666666">,</span>t<span style="color: #666666">)</span>m
     <span style="color: #008000; font-weight: bold">method</span> is_initialized <span style="color: #666666">:</span> <span style="color: #B00040">bool</span>
   <span style="color: #008000; font-weight: bold">end</span>
 
   <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>fl<span style="color: #666666">]</span> freelist <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
-    <span style="color: #008000; font-weight: bold">inherit</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>fl<span style="color: #666666">]</span> syncable
+    <span style="color: #008000; font-weight: bold">inherit</span> <span style="color: #666666">[</span><span style="color: #008000; font-weight: bold">&#39;</span>fl<span style="color: #666666">]</span> on_disk_block
     <span style="color: #008000; font-weight: bold">method</span> blk_allocator<span style="color: #666666">:</span> <span style="color: #666666">(</span>r<span style="color: #666666">,</span>t<span style="color: #666666">)</span>blk_allocator_ops
   <span style="color: #008000; font-weight: bold">end</span>
 
@@ -40,11 +44,8 @@
   <span style="color: #666666">}[@@</span>deriving bin_io<span style="color: #666666">]</span>
 
   <span style="color: #008000; font-weight: bold">class</span> <span style="color: #008000; font-weight: bold">type</span> root_man <span style="color: #666666">=</span> <span style="color: #008000; font-weight: bold">object</span>
-    <span style="color: #008000; font-weight: bold">inherit</span> <span style="color: #666666">[</span>t1<span style="color: #666666">]</span> syncable
+    <span style="color: #008000; font-weight: bold">inherit</span> <span style="color: #666666">[</span>t1<span style="color: #666666">]</span> on_disk_block
   <span style="color: #008000; font-weight: bold">end</span>
-
-  <span style="color: #408080; font-style: italic">(* The btree and pcache are not syncable, because the roots are</span>
-<span style="color: #408080; font-style: italic">     actually handled by the root_man *)</span>
 
   <span style="color: #408080; font-style: italic">(* we expect that, once setup, the threads run forever; other</span>
 <span style="color: #408080; font-style: italic">     applications may need to shutdown threads instead. *)</span> 
@@ -86,7 +87,6 @@
     <span style="color: #008000; font-weight: bold">method</span> is_initialized <span style="color: #666666">:</span> <span style="color: #B00040">bool</span>
   <span style="color: #008000; font-weight: bold">end</span>
 </pre></div>
-
 
 
 </aside><div class="spec module" id="module-Pvt_class_types"><a href="#module-Pvt_class_types" class="anchor"></a><code><span class="keyword">module</span> <a href="Pvt_class_types/index.html">Pvt_class_types</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><div class="spec module" id="module-Classes"><a href="#module-Classes" class="anchor"></a><code><span class="keyword">module</span> <a href="Classes/index.html">Classes</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="index.html#module-Classes">Classes</a></code></span></summary><div class="spec module" id="module-P"><a href="#module-P" class="anchor"></a><code><span class="keyword">module</span> P = <a href="index.html#module-Pvt_class_types">Pvt_class_types</a></code></div><section><header><h3 id="generic-syncable-object"><a href="#generic-syncable-object" class="anchor"></a>Generic syncable object</h3></header><div class="spec module" id="module-Make_mrshlr"><a href="#module-Make_mrshlr" class="anchor"></a><code><span class="keyword">module</span> Make_mrshlr = <a href="Classes/index.html#module-Make_mrshlr">Classes.Make_mrshlr</a></code></div><div class="spec class" id="class-mutable_"><a href="#class-mutable_" class="anchor"></a><code><span class="keyword">class</span> +'b <a href="class-mutable_/index.html">mutable_</a> : <span class="keyword">object</span> ... <span class="keyword">end</span></code></div><div class="spec class" id="class-set_once"><a href="#class-set_once" class="anchor"></a><code><span class="keyword">class</span> +'b <a href="class-set_once/index.html">set_once</a> : <span class="keyword">object</span> ... <span class="keyword">end</span></code></div><div class="spec class" id="class-on_disk_block"><a href="#class-on_disk_block" class="anchor"></a><code><span class="keyword">class</span> 'a <a href="class-on_disk_block/index.html">on_disk_block</a> : <span class="keyword">object</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec value" id="val-f"><a href="#val-f" class="anchor"></a><code><span class="keyword">val</span> f : <span><span class="type-var">'a</span> <a href="class-on_disk_block/index.html">on_disk_block</a></span> <span>&#45;&gt;</span> <span><span class="type-var">'a</span> <a href="Pvt_class_types/class-type-on_disk_block/index.html">P.on_disk_block</a></span></code></dt></dl></section></details></div></div></div></div></body></html>
