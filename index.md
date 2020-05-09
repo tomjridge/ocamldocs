@@ -37,3 +37,24 @@
 * 
 * [https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html](https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html)
 
+
+![Package dependencies / library structure](https://docs.google.com/drawings/d/e/2PACX-1vSqzipIxfOtcWhtSEqcBUpEKPVp1ALtHYyVVBldz7WNP3idcaQTY0iHoLBMf9n4vNMUjDvoIi_gr2gE/pub?w=1034&amp;h=520)
+
+![B-tree layers / system structure](https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&h=766)
+
+![B-tree type dependencies](https://docs.google.com/drawings/d/e/2PACX-1vRpuIadu1YMpruLuyKu5ActBCj9IOfQFnUs6wL91uDpMAh_UG085rhdv5ePmu8IP4xC-TISFa3Tso9D/pub?w=940&amp;h=601)
+
+
+![Mini-fs modules](https://docs.google.com/drawings/d/e/2PACX-1vQcYK7STiRj8bxZBFvkYaqQtsAXxCrjAKrfD2GV_uDuec5DmEY3qNq1Nbj_h-om3L1HHA5JY_RBd_uF/pub?w=953&amp;h=352)
+
+![KV arch 1](https://docs.google.com/drawings/d/e/2PACX-1vSnTmJGnVDyxnrBZ_VOVZ7T0O9etqZa-BDPu-EPH9ziiNjY375TMgO-ENB9UO4e-HT3qmtbJKvFOFl0/pub?w=453&amp;h=373)
+
+![KV arch 2](https://docs.google.com/drawings/d/e/2PACX-1vTIXhyNa7dovQYXuJXBMwPQZU99-x_tRdTIH3SkMUDyPwbL31zExWXauT2hO-eRIUcnGP3RVHiSHrjt/pub?w=557&amp;h=428)
+
+---
+
+## Demos as Imgur animated gifs
+
+- bt ![](https://i.imgur.com/Cvumjbe.png)
+- kv <https://imgur.com/fHyug2t>
+
