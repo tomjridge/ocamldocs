@@ -1,23 +1,44 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist__Summary (tjr_plist.Tjr_plist__Summary)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist</a> &#x00BB; Tjr_plist__Summary</nav><h1>Module <code>Tjr_plist__Summary</code></h1><p>Summary of main types</p></header><aside><pre><code class="ml">type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist__Summary (tjr_plist.Tjr_plist__Summary)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist</a> &#x00BB; Tjr_plist__Summary</nav><h1>Module <code>Tjr_plist__Summary</code></h1><p>Summary of main types</p></header><aside><pre><code class="ml">  type 'blk_id pl_root_info = {
+    hd  : 'blk_id;
+    tl  : 'blk_id;
+    blk_len : int
+  }
+
+type ('blk_id,'buf) plist = {
+  hd      : 'blk_id;
+  tl      : 'blk_id;
+  buffer  : 'buf;
+  off     : int;
+  blk_len : int;
+  dirty   : bool; (** may not have been written to disk *)
+}
+
+type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
   monad_ops          :'t monad_ops;
   buf_ops            :'buf buf_ops;
   blk_ops            : 'blk blk_ops;
   plist_marshal_info : ('a,'blk_id,'blk,'buf) plist_marshal_info;
   plist_marshal_ops  : ('a,'blk_id,'blk) plist_marshal_ops; 
   with_blk_dev_ops   :  
-    blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops 
+    blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
+    sync : unit -&gt; (unit,'t)m
     -&gt; &lt;
-      blk_dev_ops     : ('blk_id,'blk,'t)blk_dev_ops;
-      plist_extra_ops : ('a,'buf,'blk_id,'t) plist_extra_ops;
-      with_state      : (('blk_id,'buf)plist,'t)with_state -&gt; 
+      init : &lt;
+        mk_empty    : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
+        from_hd     : 'blk_id -&gt; ( ('a list * 'blk_id option) list, 't) m; 
+        from_endpts : 'blk_id Pl_root_info.pl_root_info -&gt; (
+            &lt;
+              plist      : ('blk_id,'buf)plist;
+              plist_ref  : ('blk_id,'buf)plist ref;              
+              with_plist : (('blk_id,'buf)plist,'t)with_state;
+              plist_ops  : ('a,'buf,'blk_id,'t)plist_ops;            
+            &gt;,'t)m;
+      &gt;;
+
+      with_state      : 
+        (('blk_id,'buf)plist,'t)with_state -&gt; 
         ('a,'buf,'blk_id,'t)plist_ops;
-      from_disk       : &lt;hd:'blk_id;tl:'blk_id;blk_len:int&gt; -&gt; 
-        (&lt;
-          plist_ops:('a,'buf,'blk_id,'t)plist_ops;
-          with_plist: (('blk_id,'buf)plist,'t)with_state;
-          plist_ref: ('blk_id,'buf)plist ref;              
-        &gt;,'t)m
     &gt;
 &gt;
 
