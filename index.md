@@ -47,7 +47,9 @@
 ![B-tree type dependencies](https://docs.google.com/drawings/d/e/2PACX-1vRpuIadu1YMpruLuyKu5ActBCj9IOfQFnUs6wL91uDpMAh_UG085rhdv5ePmu8IP4xC-TISFa3Tso9D/pub?w=940&amp;h=601)
 
 
-![Mini-fs modules](https://docs.google.com/drawings/d/e/2PACX-1vQcYK7STiRj8bxZBFvkYaqQtsAXxCrjAKrfD2GV_uDuec5DmEY3qNq1Nbj_h-om3L1HHA5JY_RBd_uF/pub?w=953&amp;h=352)
+![Mini-fs modules](https://docs.google.com/drawings/d/e/2PACX-1vQcYK7STiRj8bxZBFvkYaqQtsAXxCrjAKrfD2GV_uDuec5DmEY3qNq1Nbj_h-om3L1HHA5JY_RBd_uF/pub?w=1178&amp;h=490)
+
+
 
 ![KV arch 1](https://docs.google.com/drawings/d/e/2PACX-1vSnTmJGnVDyxnrBZ_VOVZ7T0O9etqZa-BDPu-EPH9ziiNjY375TMgO-ENB9UO4e-HT3qmtbJKvFOFl0/pub?w=453&amp;h=373)
 
