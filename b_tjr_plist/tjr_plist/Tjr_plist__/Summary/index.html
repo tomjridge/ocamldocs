@@ -22,7 +22,7 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
   plist_marshal_ops  : ('a,'blk_id,'blk) plist_marshal_ops; 
   with_blk_dev_ops   :  
     blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
-    sync : unit -&gt; (unit,'t)m
+    sync : (unit -&gt; (unit,'t)m)
     -&gt; &lt;
       init : &lt;
         mk_empty    : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
@@ -43,19 +43,18 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
 &gt;
 
 type ('a,'buf (* FIXME *),'blk_id,(* 'blk,*) 't) plist_ops = {
-  add       : nxt:'blk_id -&gt; elt:'a -&gt; ('blk_id option,'t) m;
-  add_if_room: 'a -&gt; (bool,'t)m;
-  sync_tl   : unit -&gt; (unit,'t)m;
-  blk_len   : unit -&gt; (int,'t)m;
-  adv_hd    : unit -&gt; ( ('a,'blk_id) adv_hd or_error,'t)m; 
-  (** advance hd *)
+  add           : nxt:'blk_id -&gt; elt:'a -&gt; ('blk_id option,'t) m;
+  add_if_room   : 'a -&gt; (bool,'t)m;
 
-  adv_tl    : 'blk_id -&gt; (unit,'t)m;
-  get_hd    : unit -&gt; ('blk_id,'t)m;
-  get_tl    : unit -&gt; ('blk_id,'t)m;
-  get_hd_tl : unit -&gt; ('blk_id * 'blk_id,'t)m;
-  read_hd   : unit -&gt; ('a list * 'blk_id option,'t)m;
-  append    : ('blk_id,'buf) plist -&gt; (unit,'t)m;
-  (* read_tl   : unit -&gt; (('a list * 'blk_id option)or_error,'t)m; *)
-  (* read_blk  : 'blk_id -&gt; (('a list * 'blk_id option)or_error,'t)m *)
+  sync_tl       : unit -&gt; (unit,'t)m;
+
+  adv_hd        : unit -&gt; ( ('a,'blk_id) adv_hd or_error,'t)m; 
+  adv_tl        : 'blk_id -&gt; (unit,'t)m;
+
+  blk_len       : unit -&gt; (int,'t)m;
+  get_root_info : unit -&gt; ('blk_id Pl_root_info.pl_root_info,'t)m;
+
+  read_hd       : unit -&gt; ('a list * 'blk_id option,'t)m;
+  append        : ('blk_id,'buf) plist -&gt; (unit,'t)m;
+  (* FIXME append is really an operation on two lists *)
 }</code></pre></aside></div></body></html>
