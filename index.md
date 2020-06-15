@@ -14,6 +14,9 @@
 * [b_tjr_plist/tjr_plist_freelist/Tjr_plist_freelist/index.html](b_tjr_plist/tjr_plist_freelist/Tjr_plist_freelist/index.html)
 * [b_tjr_plist/tjr_plist_examples/Tjr_plist_examples/index.html](b_tjr_plist/tjr_plist_examples/Tjr_plist_examples/index.html)
 * 
+* [c_isa_btree/index.html](c_isa_btree/index.html)
+* [c_isa_btree/isa_btree/Isa_btree/index.html](c_isa_btree/isa_btree/Isa_btree/index.html)
+* 
 * [c_tjr_btree/index.html](c_tjr_btree/index.html)
 * [c_tjr_btree/tjr_btree/Tjr_btree/index.html](c_tjr_btree/tjr_btree/Tjr_btree/index.html)
 * [c_tjr_btree/tjr_btree_examples/Tjr_btree_examples/index.html](c_tjr_btree/tjr_btree_examples/Tjr_btree_examples/index.html)
@@ -47,9 +50,7 @@
 ![B-tree type dependencies](https://docs.google.com/drawings/d/e/2PACX-1vRpuIadu1YMpruLuyKu5ActBCj9IOfQFnUs6wL91uDpMAh_UG085rhdv5ePmu8IP4xC-TISFa3Tso9D/pub?w=940&amp;h=601)
 
 
-![Mini-fs modules](https://docs.google.com/drawings/d/e/2PACX-1vQcYK7STiRj8bxZBFvkYaqQtsAXxCrjAKrfD2GV_uDuec5DmEY3qNq1Nbj_h-om3L1HHA5JY_RBd_uF/pub?w=1178&amp;h=490)
-
-
+![Mini-fs modules](https://docs.google.com/drawings/d/e/2PACX-1vQcYK7STiRj8bxZBFvkYaqQtsAXxCrjAKrfD2GV_uDuec5DmEY3qNq1Nbj_h-om3L1HHA5JY_RBd_uF/pub?w=953&amp;h=352)
 
 ![KV arch 1](https://docs.google.com/drawings/d/e/2PACX-1vSnTmJGnVDyxnrBZ_VOVZ7T0O9etqZa-BDPu-EPH9ziiNjY375TMgO-ENB9UO4e-HT3qmtbJKvFOFl0/pub?w=453&amp;h=373)
 
@@ -58,13 +59,10 @@
 ![Plist](https://docs.google.com/drawings/d/e/2PACX-1vT1LGM8Sm7USD8LF_CGLUVZ270PK4vk5LcBrENxjcebpRUYq4jxPpgCTzNFsIS8TOgrcsVvcbZcNJ-M/pub?w=645&amp;h=345)
 
 
-![ImpFS layers](https://docs.google.com/drawings/d/e/2PACX-1vSgK5p7ztaXd2sLbALyuoJEbxH979WsJokAawEqURTJjjQ-n_o2aD8n6F0i5Sill5JmF76DoiSMvobj/pub?w=904&amp;h=591)
-
 ---
 
 ## Demos as Imgur animated gifs
 
 - bt ![](https://i.imgur.com/Cvumjbe.png)
 - kv <https://imgur.com/fHyug2t>
-
 
