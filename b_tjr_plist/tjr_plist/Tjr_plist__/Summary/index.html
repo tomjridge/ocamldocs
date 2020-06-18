@@ -1,11 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">  type 'blk_id pl_root_info = {
-    hd  : 'blk_id;
-    tl  : 'blk_id;
-    blk_len : int
-  }
-
-type ('blk_id,'buf) plist = {
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('blk_id,'buf) plist = {
   hd      : 'blk_id;
   tl      : 'blk_id;
   buffer  : 'buf;
@@ -22,27 +16,38 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
   plist_marshal_ops  : ('a,'blk_id,'blk) plist_marshal_ops; 
   with_blk_dev_ops   :  
     blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
-    sync : (unit -&gt; (unit,'t)m)
+    sync        : (unit -&gt; (unit,'t)m)
     -&gt; &lt;
       init : &lt;
-        mk_empty    : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
-        from_hd     : 'blk_id -&gt; ( ('a list * 'blk_id option) list, 't) m; 
-        from_endpts : 'blk_id Pl_root_info.pl_root_info -&gt; (
-            &lt;
-              plist      : ('blk_id,'buf)plist;
-              plist_ref  : ('blk_id,'buf)plist ref;              
-              with_plist : (('blk_id,'buf)plist,'t)with_state;
-              plist_ops  : ('a,'buf,'blk_id,'t)plist_ops;            
-            &gt;,'t)m;
+        mk_empty     : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
+
+        read_from_hd : 'blk_id -&gt; ( ('a list * 'blk_id option) list, 't) m; 
+
+        from_endpts  : 'blk_id pl_origin -&gt; (('blk_id,'buf)plist,'t)m;
       &gt;;
 
-      with_state      : 
+      with_state : 
         (('blk_id,'buf)plist,'t)with_state -&gt; 
         ('a,'buf,'blk_id,'t)plist_ops;
+
+      (* convenience; use with with_state *)
+      with_ref : 
+        ('blk_id,'buf)plist -&gt; (
+          &lt;
+            plist_ref  : ('blk_id,'buf)plist ref;              
+            with_plist : (('blk_id,'buf)plist,'t)with_state;
+          &gt;);
+
+      add_origin : 
+        ('blk_id,'t) Pl_origin.ops -&gt; 
+        ('a,'buf,'blk_id,'t)plist_ops -&gt; 
+        ('a,'buf,'blk_id,'t)plist_ops
+    (** Modify plist_ops to sync the origin block when hd/tl change *)
+
     &gt;
 &gt;
 
-type ('a,'buf (* FIXME *),'blk_id,(* 'blk,*) 't) plist_ops = {
+type ('a,'buf (* FIXME *),'blk_id, 't) plist_ops = {
   add           : nxt:'blk_id -&gt; elt:'a -&gt; ('blk_id option,'t) m;
   add_if_room   : 'a -&gt; (bool,'t)m;
 
@@ -52,9 +57,8 @@ type ('a,'buf (* FIXME *),'blk_id,(* 'blk,*) 't) plist_ops = {
   adv_tl        : 'blk_id -&gt; (unit,'t)m;
 
   blk_len       : unit -&gt; (int,'t)m;
-  get_root_info : unit -&gt; ('blk_id Pl_root_info.pl_root_info,'t)m;
+  get_origin    : unit -&gt; ('blk_id pl_origin,'t)m;
 
   read_hd       : unit -&gt; ('a list * 'blk_id option,'t)m;
   append        : ('blk_id,'buf) plist -&gt; (unit,'t)m;
-  (* FIXME append is really an operation on two lists *)
 }</code></pre></aside></div></body></html>
