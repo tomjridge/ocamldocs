@@ -1,15 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist_freelist__Summary (tjr_plist_freelist.Tjr_plist_freelist__Summary)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist_freelist</a> &#x00BB; Tjr_plist_freelist__Summary</nav><h1>Module <code>Tjr_plist_freelist__Summary</code></h1><p>Summary of main types</p></header><aside><pre><code class="ml">  val make: 
-    monad_ops     :(t monad_ops) -&gt;     
-    event_ops     :t event_ops -&gt;
-    async         :((unit -&gt; (unit, t) m) -&gt; (unit, t) m) -&gt;
-    plist_ops     :(elt, buf, blk_id, t) plist_ops -&gt;
-    with_freelist :(elt freelist, t) with_state -&gt;
-    root_block    :(elt, blk_id, t) fl_root_ops -&gt;
-    version       :(elt,blk_id,t)version -&gt; 
-    (elt, t) freelist_ops
-
-type ('a,'blk_id) fl_root_info = {
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist_freelist__Summary (tjr_plist_freelist.Tjr_plist_freelist__Summary)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist_freelist</a> &#x00BB; Tjr_plist_freelist__Summary</nav><h1>Module <code>Tjr_plist_freelist__Summary</code></h1><p>Summary of main types</p></header><aside><pre><code class="ml">type ('a,'blk_id) fl_root_info = {
   hd: 'blk_id;
   tl: 'blk_id;
   blk_len: int;
@@ -25,6 +15,14 @@ type ('a,'blk_id,'t) fl_root_ops = {
   read_root  : unit -&gt; ( ('a,'blk_id)fl_root_info, 't)m;
   write_root : ('a,'blk_id) fl_root_info -&gt; (unit,'t)m;
   sync       : unit -&gt; (unit,'t)m;
+}
+
+type 'a freelist = {
+  transient          : 'a list; 
+  min_free           : ('a * 'a min_free_ops) option;
+  
+  waiting            : ('a event list);
+  disk_thread_active : bool;
 }
 
 type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
