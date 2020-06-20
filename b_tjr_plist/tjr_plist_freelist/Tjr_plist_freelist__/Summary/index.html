@@ -1,59 +1,42 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist_freelist.Tjr_plist_freelist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist_freelist</a> &#x00BB; <a href="../index.html">Tjr_plist_freelist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist_freelist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('a,'blk_id) fl_root_info = {
-  hd: 'blk_id;
-  tl: 'blk_id;
-  blk_len: int;
-  min_free: 'a option
-}
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist_freelist.Tjr_plist_freelist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist_freelist</a> &#x00BB; <a href="../index.html">Tjr_plist_freelist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist_freelist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">  type ('a,'blk_id) fl_origin = {
+    hd: 'blk_id;
+    tl: 'blk_id;
+    blk_len: int;
+    min_free: 'a option
+  }
 
-type ('a,'blk_id) fl_root_mshlr = ('a,'blk_id) fl_root_info bp_mshlr
-(** This type can be used to marshal the freelist root block; NOTE
-   this is effectively specialized to 'blk = 'buf = bigarray *)
+  (* fl_origin ops *)
+  type ('a,'blk_id,'t) ops = {
+    read  : unit -&gt; (('a,'blk_id)t,'t)m;
+    write : ('a,'blk_id)t -&gt; (unit,'t)m;
+    sync  : unit -&gt; (unit,'t)m;
+  }
 
-
-type ('a,'blk_id,'t) fl_root_ops = {
-  read_root  : unit -&gt; ( ('a,'blk_id)fl_root_info, 't)m;
-  write_root : ('a,'blk_id) fl_root_info -&gt; (unit,'t)m;
-  sync       : unit -&gt; (unit,'t)m;
-}
-
-type 'a freelist = {
-  transient          : 'a list; 
-  min_free           : ('a * 'a min_free_ops) option;
-  
-  waiting            : ('a event list);
-  disk_thread_active : bool;
-}
 
 type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
   version       : ('a, 'blk_id) for_blk_ids; 
   (** NOTE specialized to 'a =iso= 'blk_id *)
 
-  read_root: 
+  origin_ops: 
     blk_dev_ops :('blk_id,'buf,'t)blk_dev_ops -&gt; 
     blk_id      :'blk_id -&gt; 
-    ( ('a,'blk_id)fl_root_info, 't)m;
-  
-  write_root:
-    blk_dev_ops :('blk_id,'buf,'t)blk_dev_ops -&gt; 
-    blk_id      :'blk_id -&gt; 
-    ('a,'blk_id)fl_root_info -&gt; 
-    (unit,'t)m;
+    sync_blk    :(unit -&gt; (unit,'t)m) -&gt;
+    ('a,'blk_id,'t) Fl_origin.ops;
+    
 
   with_: 
     &lt; blk_dev_ops   : ('blk_id,'buf,'t)blk_dev_ops;
-      plist_ops     :('a,'buf,'blk_id,'t) plist_ops;
-      with_freelist : ('a,'t)with_state;
-      fl_root_blk   : 'blk_id; 
+      sync_blk_dev  : (unit -&gt; (unit,'t)m);
+      origin_blkid  : 'blk_id; 
     &gt;
-    -&gt; ('a,'t)freelist_ops;
+    -&gt; &lt;
+      with_state : 
+        ('a,'t)with_state -&gt; ('a,'t)freelist_ops;
 
-  from_disk: 
-    &lt; blk_dev_ops: ('blk_id,'buf,'t)blk_dev_ops;      
-      fl_root_blk: 'blk_id -&gt; (('a,'t)freelist_ops,'t)m
+      with_ref   : unit -&gt; ('a,'t)freelist_ops;
+      (** use an imperative ref to hold the state *)
     &gt;
-    -&gt; ('a,'t)freelist_ops;
-
 &gt;
 
 type ('blk_id,'t) freelist_ops = {
@@ -61,7 +44,9 @@ type ('blk_id,'t) freelist_ops = {
   alloc_many : int -&gt; (fIXME,'t)m;
   free       : 'blk_id -&gt; (unit,'t)m;
   free_many  : fIXME -&gt; (unit,'t)m;
-  sync       : sync_type -&gt; (unit,'t)m;
+  sync       : unit -&gt; (unit,'t)m;
+  (** NOTE the freelist already ensures it is crash safe; this sync is
+     really for tidy shutdown *)
 }
 
 type ('elt,'blk_id,'t) version = 
