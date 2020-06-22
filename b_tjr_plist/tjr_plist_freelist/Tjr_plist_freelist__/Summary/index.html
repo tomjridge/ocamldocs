@@ -4,7 +4,7 @@
     tl: 'blk_id;
     blk_len: int;
     min_free: 'a option
-  }
+  }[@@deriving bin_io]
 
   (* fl_origin ops *)
   type ('a,'blk_id,'t) ops = {
@@ -13,28 +13,39 @@
     sync  : unit -&gt; (unit,'t)m;
   }
 
+(** In-memory state for the freelist *)
+type 'a freelist = {
+  transient          : 'a list; 
+  min_free           : ('a * 'a min_free_ops) option;
+  
+  waiting            : ('a event list);
+  disk_thread_active : bool;
+}
 
 type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
   version       : ('a, 'blk_id) for_blk_ids; 
-  (** NOTE specialized to 'a =iso= 'blk_id *)
+  (** NOTE this is for freelist only, not arbitrary elts *)
 
   origin_ops: 
-    blk_dev_ops :('blk_id,'buf,'t)blk_dev_ops -&gt; 
-    blk_id      :'blk_id -&gt; 
-    sync_blk    :(unit -&gt; (unit,'t)m) -&gt;
+    blk_dev_ops  : ('blk_id,'buf,'t)blk_dev_ops -&gt; 
+    origin_blkid : 'blk_id -&gt; 
+    sync_origin  : (unit -&gt; (unit,'t)m) -&gt;
     ('a,'blk_id,'t) Fl_origin.ops;
     
 
   with_: 
-    &lt; blk_dev_ops   : ('blk_id,'buf,'t)blk_dev_ops;
-      sync_blk_dev  : (unit -&gt; (unit,'t)m);
-      origin_blkid  : 'blk_id; 
-    &gt;
-    -&gt; &lt;
+    blk_dev_ops  : ('blk_id,'buf,'t)blk_dev_ops -&gt;
+    sync_blk_dev : (unit -&gt; (unit,'t)m) -&gt; 
+    origin_ops   : ('a,'blk_id,'t) Fl_origin.ops -&gt; 
+    params       : params -&gt;
+    &lt;
       with_state : 
-        ('a,'t)with_state -&gt; ('a,'t)freelist_ops;
+        ('a freelist,'t)with_state -&gt; ('a,'t)freelist_ops;
 
-      with_ref   : unit -&gt; ('a,'t)freelist_ops;
+      with_ref : 'a freelist -&gt; 
+        &lt; freelist_ops: ('a,'t)freelist_ops;
+          freelist_ref: 'a freelist ref;
+        &gt;
       (** use an imperative ref to hold the state *)
     &gt;
 &gt;
@@ -53,5 +64,6 @@ type ('elt,'blk_id,'t) version =
   | For_blkids of ('elt,'blk_id) for_blk_ids
   | For_arbitrary_elts of 
       { alloc: unit -&gt; ('blk_id,'t)m; free: 'blk_id -&gt; (unit,'t)m }
+      (** For arbitrary elts, we need a way to allocate and free blocks *)
 and ('elt,'blk_id) for_blk_ids = 
   { e2b:'elt -&gt; 'blk_id; b2e: 'blk_id -&gt; 'elt } </code></pre></aside></div></body></html>
