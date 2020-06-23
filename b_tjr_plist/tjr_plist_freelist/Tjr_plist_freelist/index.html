@@ -29,6 +29,10 @@ type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
   version       : ('a, 'blk_id) for_blk_ids; 
   (** NOTE this is for freelist only, not arbitrary elts *)
 
+  empty_freelist : min_free:('a * 'a min_free_ops) option -&gt; 'a freelist;
+  (** [min_free] depends on the nature of 'a; for 'a = blk_id, we can
+     use the origin blk_id and incr to implement min_free *)
+
   origin_ops: 
     blk_dev_ops  : ('blk_id,'buf,'t)blk_dev_ops -&gt; 
     origin_blkid : 'blk_id -&gt; 
@@ -41,15 +45,25 @@ type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
     sync_blk_dev : (unit -&gt; (unit,'t)m) -&gt; 
     origin_ops   : ('a,'blk_id,'t) Fl_origin.ops -&gt; 
     params       : params -&gt;
-    &lt;
-      with_state : 
-        ('a freelist,'t)with_state -&gt; ('a,'t)freelist_ops;
+    &lt; 
+      read_origin : unit -&gt; (&lt;
+          fl_origin: ('a,'blk_id)Fl_origin.t;
+          pl_origin: 'a Pl_origin.t
+        &gt;,'t)m;
 
-      with_ref : 'a freelist -&gt; 
-        &lt; freelist_ops: ('a,'t)freelist_ops;
-          freelist_ref: 'a freelist ref;
+      plist_ops : 'a Pl_origin.t -&gt; (('a,'buf,'blk_id,'t) plist_ops,'t)m;
+
+      with_plist_ops : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
+        &lt;
+          with_state : 
+            ('a freelist,'t)with_state -&gt; ('a,'t)freelist_ops;
+
+          with_ref : 'a freelist -&gt; 
+            &lt; freelist_ops: ('a,'t)freelist_ops;
+              freelist_ref: 'a freelist ref;
+            &gt;
+        (** use an imperative ref to hold the state *)
         &gt;
-      (** use an imperative ref to hold the state *)
     &gt;
 &gt;
 
@@ -69,4 +83,4 @@ type ('elt,'blk_id,'t) version =
       { alloc: unit -&gt; ('blk_id,'t)m; free: 'blk_id -&gt; (unit,'t)m }
       (** For arbitrary elts, we need a way to allocate and free blocks *)
 and ('elt,'blk_id) for_blk_ids = 
-  { e2b:'elt -&gt; 'blk_id; b2e: 'blk_id -&gt; 'elt } </code></pre></aside></details></div></div></div><dl><dt class="spec module" id="module-Freelist_intf"><a href="#module-Freelist_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Freelist_intf/index.html">Freelist_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main interfaces used by the freelist</p></dd></dl><section><header><h3 id="make-functors"><a href="#make-functors" class="anchor"></a>Make functors</h3></header><dl><dt class="spec module" id="module-Fl_make_1"><a href="#module-Fl_make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Fl_make_1/index.html">Fl_make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Implement a concurrent-safe freelist using the persistent list.</p></dd></dl></section><section><header><h3 id="examples-and-summary"><a href="#examples-and-summary" class="anchor"></a>Examples and summary</h3></header><dl><dt class="spec value" id="val-fl_examples"><a href="#val-fl_examples" class="anchor"></a><code><span class="keyword">val</span> fl_examples : &lt; freelist_factory : <span><span>(Tjr_fs_shared.Shared_ctxt.r, Tjr_fs_shared.Pvt_bin_prot_marshalling.ba_buf, Tjr_fs_shared.Shared_ctxt.r, Tjr_monad.With_lwt.lwt)</span> <a href="Freelist_intf/index.html#type-freelist_factory">Freelist_intf.freelist_factory</a></span>; &gt;</code></dt></dl><div class="spec module" id="module-Freelist_example"><a href="#module-Freelist_example" class="anchor"></a><code><span class="keyword">module</span> <a href="Freelist_example/index.html">Freelist_example</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec module" id="module-Summary"><a href="#module-Summary" class="anchor"></a><code><span class="keyword">module</span> <a href="Summary/index.html">Summary</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Summary of main types</p></dd></dl></section></div></body></html>
+  { e2b:'elt -&gt; 'blk_id; b2e: 'blk_id -&gt; 'elt } </code></pre></aside></details></div></div></div><dl><dt class="spec module" id="module-Freelist_intf"><a href="#module-Freelist_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Freelist_intf/index.html">Freelist_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main interfaces used by the freelist</p></dd></dl><section><header><h3 id="make-functors"><a href="#make-functors" class="anchor"></a>Make functors</h3></header><dl><dt class="spec module" id="module-Fl_make_1"><a href="#module-Fl_make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Fl_make_1/index.html">Fl_make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Implement a concurrent-safe freelist using the persistent list.</p></dd></dl></section><section><header><h3 id="examples-and-summary"><a href="#examples-and-summary" class="anchor"></a>Examples and summary</h3></header><dl><dt class="spec value" id="val-fl_examples"><a href="#val-fl_examples" class="anchor"></a><code><span class="keyword">val</span> fl_examples : &lt; empty_freelist : <span>min_free:<span>Tjr_fs_shared.Shared_ctxt.r option</span></span> <span>&#45;&gt;</span> <span>Tjr_fs_shared.Shared_ctxt.r <a href="Freelist_intf/index.html#type-freelist">Freelist_intf.freelist</a></span>; freelist_factory : <span><span>(Tjr_fs_shared.Shared_ctxt.r, Tjr_fs_shared.Pvt_bin_prot_marshalling.ba_buf, Tjr_fs_shared.Shared_ctxt.r, Tjr_monad.With_lwt.lwt)</span> <a href="Freelist_intf/index.html#type-freelist_factory">Freelist_intf.freelist_factory</a></span>; &gt;</code></dt></dl><dl><dt class="spec module" id="module-Summary"><a href="#module-Summary" class="anchor"></a><code><span class="keyword">module</span> <a href="Summary/index.html">Summary</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Summary of main types</p></dd></dl></section></div></body></html>
