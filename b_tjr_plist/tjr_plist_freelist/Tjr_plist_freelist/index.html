@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist_freelist (tjr_plist_freelist.Tjr_plist_freelist)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist_freelist</a> &#x00BB; Tjr_plist_freelist</nav><h1>Module <code>Tjr_plist_freelist</code></h1><p>A freelist providing alloc and free, based on plist; concurrent-safe ((multiple writers are allowed, but only a single thread interacts with disk); safe to open this module.</p> <img
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_plist_freelist (tjr_plist_freelist.Tjr_plist_freelist)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_plist_freelist</a> &#x00BB; Tjr_plist_freelist</nav><h1>Module <code>Tjr_plist_freelist</code></h1><p>A freelist providing alloc and free, based on plist; concurrent-safe ((multiple writers are allowed, but only a single thread interacts with disk); safe to open this module.</p> <img width='100%'
    src="https://docs.google.com/drawings/d/e/2PACX-1vT1LGM8Sm7USD8LF_CGLUVZ270PK4vk5LcBrENxjcebpRUYq4jxPpgCTzNFsIS8TOgrcsVvcbZcNJ-M/pub?w=974&amp;h=871">
 
 <nav class="toc"><ul><li><a href="#make-functors">Make functors</a></li><li><a href="#examples-and-summary">Examples and summary</a></li></ul></nav></header><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="index.html#module-Summary">Summary</a></code></span></summary><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">  type ('a,'blk_id) fl_origin = {
@@ -11,9 +11,10 @@
 
   (* fl_origin ops *)
   type ('a,'blk_id,'t) ops = {
-    read  : unit -&gt; (('a,'blk_id)t,'t)m;
-    write : ('a,'blk_id)t -&gt; (unit,'t)m;
-    sync  : unit -&gt; (unit,'t)m;
+    read    : unit -&gt; (('a,'blk_id)t,'t)m;
+    write   : ('a,'blk_id)t -&gt; (unit,'t)m;
+    (* barrier : unit -&gt; (unit,'t)m; *)
+    (* sync    : unit -&gt; (unit,'t)m; *)
   }
 
 (** In-memory state for the freelist *)
@@ -33,24 +34,20 @@ type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
   (** [min_free] depends on the nature of 'a; for 'a = blk_id, we can
      use the origin blk_id and incr to implement min_free *)
 
-  origin_ops: 
-    blk_dev_ops  : ('blk_id,'buf,'t)blk_dev_ops -&gt; 
-    origin_blkid : 'blk_id -&gt; 
-    sync_origin  : (unit -&gt; (unit,'t)m) -&gt;
+  origin_ops:
+    blk_dev_ops : ('blk_id,'buf,'t)blk_dev_ops -&gt;
+    barrier     : (unit -&gt; (unit,'t)m) -&gt; 
+    sync        : (unit -&gt; (unit,'t)m) -&gt; 
+    blk_id      : 'blk_id -&gt; 
     ('a,'blk_id,'t) Fl_origin.ops;
-    
 
   with_: 
-    blk_dev_ops  : ('blk_id,'buf,'t)blk_dev_ops -&gt;
-    sync_blk_dev : (unit -&gt; (unit,'t)m) -&gt; 
-    origin_ops   : ('a,'blk_id,'t) Fl_origin.ops -&gt; 
-    params       : params -&gt;
-    &lt; 
-      read_origin : unit -&gt; (&lt;
-          fl_origin: ('a,'blk_id)Fl_origin.t;
-          pl_origin: 'a Pl_origin.t
-        &gt;,'t)m;
-
+    blk_dev_ops : ('blk_id,'buf,'t)blk_dev_ops -&gt;
+    barrier     : (unit -&gt; (unit,'t)m) -&gt; 
+    sync        : (unit -&gt; (unit,'t)m) -&gt; 
+    origin_ops  : ('a,'blk_id,'t) Fl_origin.ops -&gt;
+    params      : params -&gt;
+    &lt;          
       plist_ops : 'a Pl_origin.t -&gt; (('a,'buf,'blk_id,'t) plist_ops,'t)m;
 
       with_plist_ops : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
@@ -58,11 +55,11 @@ type ('a,'buf,'blk_id,'t) freelist_factory = &lt;
           with_state : 
             ('a freelist,'t)with_state -&gt; ('a,'t)freelist_ops;
 
-          with_ref : 'a freelist -&gt; 
+          with_locked_ref : 'a freelist -&gt; 
             &lt; freelist_ops: ('a,'t)freelist_ops;
               freelist_ref: 'a freelist ref;
             &gt;
-        (** use an imperative ref to hold the state *)
+        (** use an imperative ref to hold the state; lock for concurrency *)
         &gt;
     &gt;
 &gt;

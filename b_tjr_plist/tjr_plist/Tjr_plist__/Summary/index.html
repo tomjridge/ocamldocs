@@ -1,5 +1,14 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('blk_id,'buf) plist = {
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('blk_id,'blk,'t) origin_factory = &lt;
+  monad_ops :'t monad_ops;
+  with_: 
+    blk_dev_ops: ('blk_id,'blk,'t)blk_dev_ops -&gt; 
+    blk_id : 'blk_id -&gt; 
+    sync_blk_id : (unit -&gt; (unit,'t)m) -&gt;
+    &lt; set_and_sync: 'blk_id pl_origin -&gt; (unit,'t)m &gt;
+&gt;
+
+type ('blk_id,'buf) plist = {
   hd      : 'blk_id;
   tl      : 'blk_id;
   buffer  : 'buf;
@@ -16,9 +25,10 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
   plist_marshal_ops  : ('a,'blk_id,'blk) plist_marshal_ops; 
   with_blk_dev_ops   :  
     blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
-    sync        : (unit -&gt; (unit,'t)m)
+    barrier     : (unit -&gt; (unit,'t)m)
     -&gt; &lt;
       init : &lt;
+        (* FIXME rename to &quot;initialize_empty_blk&quot; or similar *)
         mk_empty     : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
 
         read_from_hd : 'blk_id -&gt; ( ('a list * 'blk_id option) list, 't) m; 
