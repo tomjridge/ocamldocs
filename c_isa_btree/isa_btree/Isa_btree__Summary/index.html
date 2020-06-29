@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Isa_btree__Summary (isa_btree.Isa_btree__Summary)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">isa_btree</a> &#x00BB; Isa_btree__Summary</nav><h1>Module <code>Isa_btree__Summary</code></h1><p>Summary of the main interfaces</p></header><aside><pre><code class="ml">(** Argument to Make functor *)
+module type S = sig 
+  type k
+  type v
+  type r
+  type t
+  val k_cmp     : k -&gt; k -&gt; int
+  val monad_ops : t monad_ops
+  val cs        : constants
+end
+
+
+(** Result of Make functor *)
+module type T = sig
+  module S : S
+  open S
+
+  type leaf 
+  type node
+  type leaf_stream
+
+  (** NOTE leaf_ops and node_ops are used externally to convert
+     to/from lists *)
+  val leaf_ops: (k,v,leaf)leaf_ops
+  val node_ops: (k,r,node)node_ops
+
+  val make_btree_ops: 
+    store_ops:(r, (node, leaf) dnode, t) store_ops -&gt;
+    (k, v, r, t, leaf, node, leaf_stream) pre_btree_ops
+end
+
+
+  (** store_ops are like a blk device, but allowing read/writes of
+     leafs and nodes rather than blks (so, marshalling is done in a
+     lower layer)
+
+      NOTE rewrite attempts to rewrite a block; this may not be
+     allowed (CoW) and instead a new block is allocated and written
+
+      NOTE also that 'dnode is either leaf or node *)
+  type ('r,'dnode,'t) store_ops = {
+    read    : 'r -&gt; ('dnode,'t) m;
+    wrte    : 'dnode -&gt; ('r,'t) m;
+    rewrite : 'r -&gt; 'dnode -&gt; ('r option, 't) m;
+    free    : 'r list -&gt; (unit,'t) m
+  }
+
+
+  (** Leaf-stream ops. Note that [ls_leaf] always returns a leaf i.e.
+     each step transitions from one leaf to the next. FIXME not
+     concurrent safe- may need CoW or detailed analysis of concurrent
+     mutations on B-tree or at worst blocking of conc mutation or ls
+     failure *)
+  type ('k,'v,'r,'ls_state,'t) leaf_stream_ops = {
+    make_leaf_stream : 'r -&gt; ('ls_state,'t) m;
+    ls_step          : 'ls_state -&gt; ('ls_state option,'t) m;
+    ls_kvs           : 'ls_state -&gt; ('k*'v)list;
+  }
+
+
+  (** Pre-map ops, with root passing, exposing leaf and frame *)
+  type ('k,'v,'r,'leaf,'frame,'t) pre_map_ops = {
+    leaf_lookup : 'k -&gt; 'leaf -&gt; 'v option;
+    find        : r:'r -&gt; k:'k -&gt; ('r * 'leaf * 'frame list,'t) m;
+    insert      : r:'r -&gt; k:'k -&gt; v:'v -&gt; ('r option,'t) m;
+    delete      : r:'r -&gt; k:'k -&gt; ('r,'t) m;
+  }
+
+
+  type ('k,'v,'r,'t,'leaf,'node,'ls) pre_btree_ops = {
+    find   : r:'r -&gt; k:'k -&gt; ('r * 'leaf * ('k, 'r, 'node) frame list, 't) m;
+    insert : r:'r -&gt; k:'k -&gt; v:'v -&gt; ('r option, 't) m;
+    delete : r:'r -&gt; k:'k -&gt; ('r, 't) m;
+
+    leaf_stream_ops : ('k, 'v, 'r, 'ls, 't) leaf_stream_ops;
+    leaf_ops        : ('k,'v,'leaf) leaf_ops;
+    node_ops        : ('k,'r,'node) node_ops;
+
+    (* FIXME pre_map_ops seems to reproduce find, ... *)
+    pre_map_ops     : ('k, 'v, 'r, 'leaf, ('k, 'r, 'node) frame, 't) pre_map_ops;
+
+    insert_many     : ('k, 'v, 'r, 't) insert_many_type;
+    insert_all      : ('k, 'v, 'r, 't) insert_all_type
+  }</code></pre></aside></div></body></html>
