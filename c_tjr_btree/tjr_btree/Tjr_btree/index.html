@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_btree (tjr_btree.Tjr_btree)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_btree</a> &#x00BB; Tjr_btree</nav><h1>Module <code>Tjr_btree</code></h1><p>Export the main functionality of this library.</p><p>Usage: open Tjr_btree;; open Tjr_btree.Btree_intf;;</p><nav class="toc"><ul><li><a href="#main-interfaces">Main interfaces</a></li><li><a href="#bin-prot-marshalling">Bin prot marshalling</a></li><li><a href="#misc">Misc</a></li></ul></nav></header><aside> 
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&amp;h=766"> 
-</aside><section><header><h3 id="main-interfaces"><a href="#main-interfaces" class="anchor"></a>Main interfaces</h3></header><dl><dt class="spec module" id="module-Btree_intf"><a href="#module-Btree_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Btree_intf/index.html">Btree_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>A collection of the main interfaces. This should be read first.</p></dd></dl><div class="spec module" id="module-Pvt"><a href="#module-Pvt" class="anchor"></a><code><span class="keyword">module</span> <a href="Pvt/index.html">Pvt</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main functionality: disk to map</p></dd></dl><dl><dt class="spec module" id="module-Make_5"><a href="#module-Make_5" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_5/index.html">Make_5</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Like make_1, but using bin_prot marshalling</p></dd></dl><aside><p><code>Make_5</code> main interfaces:</p><pre><code class="ml">module type S = sig
+</aside><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="../Tjr_btree__/index.html#module-Summary">Tjr_btree__.Summary</a></code></span></summary><aside><p><code>Make_5</code> main interfaces:</p><pre><code class="ml">module type S = sig
   type k
   type v
   type r
   type t
-  val k_cmp: k -&gt; k -&gt; int
-  val monad_ops: t monad_ops
-  val cs: Constants.constants
+  val k_cmp     : k -&gt; k -&gt; int
+  val monad_ops : t monad_ops
+  val cs        : Constants.constants
 
-  val k_mshlr: k bp_mshlr
-  val v_mshlr: v bp_mshlr
-  val r_mshlr: r bp_mshlr
+  val k_mshlr   : k bp_mshlr
+  val v_mshlr   : v bp_mshlr
+  val r_mshlr   : r bp_mshlr
 
-  val r_cmp: r -&gt; r -&gt; int (* for wbc *)
+  val r_cmp     : r -&gt; r -&gt; int (* for wbc *)
 end
 
   type ('k,'v,'r,'ls,'t) bt_1 = &lt;
@@ -35,4 +35,33 @@ end
     make_uncached: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_1;
     make_cached_1: ('r, 't) with_btree_root -&gt; ('wbc,'t)with_state -&gt; ('k,'v,'r,'ls,'t) bt_2;
     make_cached_2: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_2;
-  &gt;</code></pre></aside></section><section><header><h3 id="bin-prot-marshalling"><a href="#bin-prot-marshalling" class="anchor"></a>Bin prot marshalling</h3></header><dl><dt class="spec module" id="module-Bin_prot_marshalling"><a href="#module-Bin_prot_marshalling" class="anchor"></a><code><span class="keyword">module</span> <a href="Bin_prot_marshalling/index.html">Bin_prot_marshalling</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Marshal frames to blocks using binprot FIXME needs polish. Currently assumes that blk_ids are ints.</p></dd></dl></section><section><header><h3 id="misc"><a href="#misc" class="anchor"></a>Misc</h3></header><div class="spec module" id="module-Debug_"><a href="#module-Debug_" class="anchor"></a><code><span class="keyword">module</span> <a href="Debug_/index.html">Debug_</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div></section></div></body></html>
+  &gt;
+
+  (** A collection of block-based interfaces *)
+  type ('r,'t,'dnode,'blk) disk_ops = {
+    dnode_mshlr : ('dnode,'blk)dnode_mshlr;
+    blk_dev_ops : ('r,'blk,'t)blk_dev_ops;
+    blk_alloc   : ('r,'t)blk_allocator_ops
+  }
+
+type ('dnode,'blk) dnode_mshlr = {
+  dnode_to_blk : 'dnode -&gt; 'blk;
+  blk_to_dnode : 'blk -&gt; 'dnode;
+  blk_sz       : blk_sz
+}
+
+  type ('k,'v,'r,'ls,'t) map_ops_with_ls = {
+    find            : k:'k -&gt; ('v option, 't)m;
+    insert          : k:'k -&gt; v:'v -&gt; (unit,'t) m;
+    delete          : k:'k -&gt; (unit,'t)m;
+    insert_many     : k:'k -&gt; v:'v -&gt; kvs:('k * 'v) list -&gt; (('k * 'v) list, 't) m;
+    insert_all      : kvs:('k * 'v) list -&gt; (unit, 't) m;    
+    leaf_stream_ops : ('k,'v,'r,'ls,'t)Isa_btree_intf.leaf_stream_ops;
+  }
+
+type ('k,'v,'r,'node,'leaf) node_cnvs = {
+  node_to_krs: 'node -&gt; 'k list * 'r list;
+  krs_to_node: ('k list * 'r list) -&gt; 'node;
+  leaf_to_kvs: 'leaf -&gt; ('k * 'v) list;
+  kvs_to_leaf: ('k * 'v) list -&gt; 'leaf;
+}</code></pre></aside></details></div></div></div><section><header><h3 id="main-interfaces"><a href="#main-interfaces" class="anchor"></a>Main interfaces</h3></header><dl><dt class="spec module" id="module-Btree_intf"><a href="#module-Btree_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Btree_intf/index.html">Btree_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>A collection of the main interfaces. This should be read first.</p></dd></dl><div class="spec module" id="module-Pvt"><a href="#module-Pvt" class="anchor"></a><code><span class="keyword">module</span> <a href="Pvt/index.html">Pvt</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main functionality: disk to map</p></dd></dl><dl><dt class="spec module" id="module-Make_5"><a href="#module-Make_5" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_5/index.html">Make_5</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Like make_1, but using bin_prot marshalling</p></dd></dl></section><section><header><h3 id="bin-prot-marshalling"><a href="#bin-prot-marshalling" class="anchor"></a>Bin prot marshalling</h3></header><dl><dt class="spec module" id="module-Bin_prot_marshalling"><a href="#module-Bin_prot_marshalling" class="anchor"></a><code><span class="keyword">module</span> <a href="Bin_prot_marshalling/index.html">Bin_prot_marshalling</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Marshal frames to blocks using binprot FIXME needs polish. Currently assumes that blk_ids are ints.</p></dd></dl></section><section><header><h3 id="misc"><a href="#misc" class="anchor"></a>Misc</h3></header><div class="spec module" id="module-Debug_"><a href="#module-Debug_" class="anchor"></a><code><span class="keyword">module</span> <a href="Debug_/index.html">Debug_</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div></section></div></body></html>
