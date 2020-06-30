@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_btree.Tjr_btree__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_btree</a> &#x00BB; <a href="../index.html">Tjr_btree__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_btree__.Summary</code></h1></header><aside><p><code>Make_5</code> main interfaces:</p><pre><code class="ml">module type S = sig
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_btree.Tjr_btree__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_btree</a> &#x00BB; <a href="../index.html">Tjr_btree__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_btree__.Summary</code></h1></header><aside><p><code>Make_6</code> main interfaces:</p><pre><code class="ml">module type S = sig
   type k
   type v
   type r
@@ -15,32 +15,65 @@
   val r_cmp     : r -&gt; r -&gt; int (* for wbc *)
 end
 
-  type ('k,'v,'r,'ls,'t) bt_1 = &lt;
-    map_ops_with_ls: ('k,'v,'r,'ls,'t) map_ops_with_ls
-  &gt;
+type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
+  (* monad_ops, k_cmp, cs given *)
+  leaf_ops: ('k,'v,'leaf)leaf_ops;
+  node_ops: ('k,'r,'node)node_ops;
 
-  type ('k,'v,'r,'ls,'t) bt_2 = &lt;
-    flush_wbc: unit -&gt; (unit,'t)m;
-    sync_key: 'k -&gt; (unit,'t)m;
-    map_ops_with_ls: ('k,'v,'r,'ls,'t) map_ops_with_ls
-  &gt;
+  wbc_factory : ('r,'dnode,'wbc)wbc_factory;
 
-  type ('k,'v,'r,'t,'ls,'blk,'dnode,'wbc) btree_factory = &lt;
-    (* method blk_dev_ops: ('r,'blk,'t) blk_dev_ops *)
-    (* method blk_allocator_ops: ('r,'t)blk_allocator_ops *)
-    empty_leaf_as_blk: 'blk;
-    wbc_factory: ('r,'dnode,'wbc)wbc_factory;
-    make_uncached: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_1;
-    make_cached_1: ('r, 't) with_btree_root -&gt; ('wbc,'t)with_state -&gt; ('k,'v,'r,'ls,'t) bt_2;
-    make_cached_2: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_2;
-  &gt;
+  dnode_mshlr : blk_sz -&gt; ('dnode, 'blk) dnode_mshlr;
 
-  (** A collection of block-based interfaces *)
-  type ('r,'t,'dnode,'blk) disk_ops = {
-    dnode_mshlr : ('dnode,'blk)dnode_mshlr;
-    blk_dev_ops : ('r,'blk,'t)blk_dev_ops;
-    blk_alloc   : ('r,'t)blk_allocator_ops
-  }
+
+  (* Store layer *)
+
+  make_store_ops:
+    blk_dev_ops : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc   : ('r, 't) blk_allocator_ops -&gt; 
+    &lt;
+      uncached_store_ops : ('r,'dnode,'t)store_ops;
+
+      with_wbc : 
+        (* with_btree_root : ('r,'t)with_state -&gt;  *)
+        wbc_ops         : ('r,'dnode,'wbc)wbc_ops -&gt;
+        with_wbc        : ('wbc,'t)with_state -&gt;
+        &lt;
+          flush_wbc          : unit -&gt; (unit,'t)m;
+          store_ops_with_wbc : ('r,'dnode,'t)store_ops
+        &gt;;
+    &gt;;
+
+  (* Upper layers *)
+
+  pre_btree_ops: 
+    ('r,'dnode,'t)store_ops -&gt; 
+    ('k, 'v, 'r, 't, 'leaf, 'node, 'ls) pre_btree_ops;
+
+  map_ops_with_ls: 
+    pre_btree_ops   : ('k, 'v, 'r, 't, 'leaf, 'node, 'ls) pre_btree_ops -&gt;
+    with_btree_root : ('r,'t)with_state -&gt; 
+    ('k,'v,'r,'ls,'t) map_ops_with_ls;
+
+
+  (* Convenience *)
+
+  uncached:
+    blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
+    init_btree_root : 'r -&gt; 
+    ('k,'v,'r,'ls,'t) map_ops_with_ls;
+
+  cached:
+    blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
+    wbc_params      : wbc_params -&gt;  
+    init_btree_root : 'r -&gt; 
+    &lt;
+      flush_wbc       : unit -&gt; (unit,'t)m;
+      (* sync_key        : 'k -&gt; (unit,'t)m; *)
+      map_ops_with_ls : ('k,'v,'r,'ls,'t) map_ops_with_ls;
+    &gt;; 
+&gt;
 
 type ('dnode,'blk) dnode_mshlr = {
   dnode_to_blk : 'dnode -&gt; 'blk;
@@ -55,11 +88,4 @@ type ('dnode,'blk) dnode_mshlr = {
     insert_many     : k:'k -&gt; v:'v -&gt; kvs:('k * 'v) list -&gt; (('k * 'v) list, 't) m;
     insert_all      : kvs:('k * 'v) list -&gt; (unit, 't) m;    
     leaf_stream_ops : ('k,'v,'r,'ls,'t)Isa_btree_intf.leaf_stream_ops;
-  }
-
-type ('k,'v,'r,'node,'leaf) node_cnvs = {
-  node_to_krs: 'node -&gt; 'k list * 'r list;
-  krs_to_node: ('k list * 'r list) -&gt; 'node;
-  leaf_to_kvs: 'leaf -&gt; ('k * 'v) list;
-  kvs_to_leaf: ('k * 'v) list -&gt; 'leaf;
-}</code></pre></aside></div></body></html>
+  }</code></pre></aside></div></body></html>

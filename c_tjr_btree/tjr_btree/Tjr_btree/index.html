@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_btree (tjr_btree.Tjr_btree)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_btree</a> &#x00BB; Tjr_btree</nav><h1>Module <code>Tjr_btree</code></h1><p>Export the main functionality of this library.</p><p>Usage: open Tjr_btree;; open Tjr_btree.Btree_intf;;</p><nav class="toc"><ul><li><a href="#main-interfaces">Main interfaces</a></li><li><a href="#bin-prot-marshalling">Bin prot marshalling</a></li><li><a href="#misc">Misc</a></li></ul></nav></header><aside> 
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&amp;h=766"> 
-</aside><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="../Tjr_btree__/index.html#module-Summary">Tjr_btree__.Summary</a></code></span></summary><aside><p><code>Make_5</code> main interfaces:</p><pre><code class="ml">module type S = sig
+</aside><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="../Tjr_btree__/index.html#module-Summary">Tjr_btree__.Summary</a></code></span></summary><aside><p><code>Make_6</code> main interfaces:</p><pre><code class="ml">module type S = sig
   type k
   type v
   type r
@@ -17,32 +17,65 @@
   val r_cmp     : r -&gt; r -&gt; int (* for wbc *)
 end
 
-  type ('k,'v,'r,'ls,'t) bt_1 = &lt;
-    map_ops_with_ls: ('k,'v,'r,'ls,'t) map_ops_with_ls
-  &gt;
+type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
+  (* monad_ops, k_cmp, cs given *)
+  leaf_ops: ('k,'v,'leaf)leaf_ops;
+  node_ops: ('k,'r,'node)node_ops;
 
-  type ('k,'v,'r,'ls,'t) bt_2 = &lt;
-    flush_wbc: unit -&gt; (unit,'t)m;
-    sync_key: 'k -&gt; (unit,'t)m;
-    map_ops_with_ls: ('k,'v,'r,'ls,'t) map_ops_with_ls
-  &gt;
+  wbc_factory : ('r,'dnode,'wbc)wbc_factory;
 
-  type ('k,'v,'r,'t,'ls,'blk,'dnode,'wbc) btree_factory = &lt;
-    (* method blk_dev_ops: ('r,'blk,'t) blk_dev_ops *)
-    (* method blk_allocator_ops: ('r,'t)blk_allocator_ops *)
-    empty_leaf_as_blk: 'blk;
-    wbc_factory: ('r,'dnode,'wbc)wbc_factory;
-    make_uncached: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_1;
-    make_cached_1: ('r, 't) with_btree_root -&gt; ('wbc,'t)with_state -&gt; ('k,'v,'r,'ls,'t) bt_2;
-    make_cached_2: ('r, 't) with_btree_root -&gt; ('k,'v,'r,'ls,'t) bt_2;
-  &gt;
+  dnode_mshlr : blk_sz -&gt; ('dnode, 'blk) dnode_mshlr;
 
-  (** A collection of block-based interfaces *)
-  type ('r,'t,'dnode,'blk) disk_ops = {
-    dnode_mshlr : ('dnode,'blk)dnode_mshlr;
-    blk_dev_ops : ('r,'blk,'t)blk_dev_ops;
-    blk_alloc   : ('r,'t)blk_allocator_ops
-  }
+
+  (* Store layer *)
+
+  make_store_ops:
+    blk_dev_ops : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc   : ('r, 't) blk_allocator_ops -&gt; 
+    &lt;
+      uncached_store_ops : ('r,'dnode,'t)store_ops;
+
+      with_wbc : 
+        (* with_btree_root : ('r,'t)with_state -&gt;  *)
+        wbc_ops         : ('r,'dnode,'wbc)wbc_ops -&gt;
+        with_wbc        : ('wbc,'t)with_state -&gt;
+        &lt;
+          flush_wbc          : unit -&gt; (unit,'t)m;
+          store_ops_with_wbc : ('r,'dnode,'t)store_ops
+        &gt;;
+    &gt;;
+
+  (* Upper layers *)
+
+  pre_btree_ops: 
+    ('r,'dnode,'t)store_ops -&gt; 
+    ('k, 'v, 'r, 't, 'leaf, 'node, 'ls) pre_btree_ops;
+
+  map_ops_with_ls: 
+    pre_btree_ops   : ('k, 'v, 'r, 't, 'leaf, 'node, 'ls) pre_btree_ops -&gt;
+    with_btree_root : ('r,'t)with_state -&gt; 
+    ('k,'v,'r,'ls,'t) map_ops_with_ls;
+
+
+  (* Convenience *)
+
+  uncached:
+    blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
+    init_btree_root : 'r -&gt; 
+    ('k,'v,'r,'ls,'t) map_ops_with_ls;
+
+  cached:
+    blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
+    wbc_params      : wbc_params -&gt;  
+    init_btree_root : 'r -&gt; 
+    &lt;
+      flush_wbc       : unit -&gt; (unit,'t)m;
+      (* sync_key        : 'k -&gt; (unit,'t)m; *)
+      map_ops_with_ls : ('k,'v,'r,'ls,'t) map_ops_with_ls;
+    &gt;; 
+&gt;
 
 type ('dnode,'blk) dnode_mshlr = {
   dnode_to_blk : 'dnode -&gt; 'blk;
@@ -57,11 +90,4 @@ type ('dnode,'blk) dnode_mshlr = {
     insert_many     : k:'k -&gt; v:'v -&gt; kvs:('k * 'v) list -&gt; (('k * 'v) list, 't) m;
     insert_all      : kvs:('k * 'v) list -&gt; (unit, 't) m;    
     leaf_stream_ops : ('k,'v,'r,'ls,'t)Isa_btree_intf.leaf_stream_ops;
-  }
-
-type ('k,'v,'r,'node,'leaf) node_cnvs = {
-  node_to_krs: 'node -&gt; 'k list * 'r list;
-  krs_to_node: ('k list * 'r list) -&gt; 'node;
-  leaf_to_kvs: 'leaf -&gt; ('k * 'v) list;
-  kvs_to_leaf: ('k * 'v) list -&gt; 'leaf;
-}</code></pre></aside></details></div></div></div><section><header><h3 id="main-interfaces"><a href="#main-interfaces" class="anchor"></a>Main interfaces</h3></header><dl><dt class="spec module" id="module-Btree_intf"><a href="#module-Btree_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Btree_intf/index.html">Btree_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>A collection of the main interfaces. This should be read first.</p></dd></dl><div class="spec module" id="module-Pvt"><a href="#module-Pvt" class="anchor"></a><code><span class="keyword">module</span> <a href="Pvt/index.html">Pvt</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main functionality: disk to map</p></dd></dl><dl><dt class="spec module" id="module-Make_5"><a href="#module-Make_5" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_5/index.html">Make_5</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Like make_1, but using bin_prot marshalling</p></dd></dl></section><section><header><h3 id="bin-prot-marshalling"><a href="#bin-prot-marshalling" class="anchor"></a>Bin prot marshalling</h3></header><dl><dt class="spec module" id="module-Bin_prot_marshalling"><a href="#module-Bin_prot_marshalling" class="anchor"></a><code><span class="keyword">module</span> <a href="Bin_prot_marshalling/index.html">Bin_prot_marshalling</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Marshal frames to blocks using binprot FIXME needs polish. Currently assumes that blk_ids are ints.</p></dd></dl></section><section><header><h3 id="misc"><a href="#misc" class="anchor"></a>Misc</h3></header><div class="spec module" id="module-Debug_"><a href="#module-Debug_" class="anchor"></a><code><span class="keyword">module</span> <a href="Debug_/index.html">Debug_</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div></section></div></body></html>
+  }</code></pre></aside></details></div></div></div><section><header><h3 id="main-interfaces"><a href="#main-interfaces" class="anchor"></a>Main interfaces</h3></header><dl><dt class="spec module" id="module-Btree_intf"><a href="#module-Btree_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Btree_intf/index.html">Btree_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>A collection of the main interfaces. This should be read first.</p></dd></dl><div class="spec module" id="module-Pvt"><a href="#module-Pvt" class="anchor"></a><code><span class="keyword">module</span> <a href="Pvt/index.html">Pvt</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main functionality: disk to map</p></dd></dl><dl><dt class="spec module" id="module-Make_6"><a href="#module-Make_6" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_6/index.html">Make_6</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Most recent interface, this time based on layers</p></dd></dl><dl><dt class="spec value" id="val-btree_examples"><a href="#val-btree_examples" class="anchor"></a><code><span class="keyword">val</span> btree_examples : &lt; int_int_factory : <span><span>(<a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-k">Make_6.Examples.Int_int.k</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-v">Make_6.Examples.Int_int.v</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-r">Make_6.Examples.Int_int.r</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-t">Make_6.Examples.Int_int.t</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-leaf">Make_6.Examples.Int_int.leaf</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-node">Make_6.Examples.Int_int.node</a>, <span><span>(<a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-node">Make_6.Examples.Int_int.node</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-leaf">Make_6.Examples.Int_int.leaf</a>)</span> Isa_btree.dnode</span>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-ls">Make_6.Examples.Int_int.ls</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-blk">Make_6.Examples.Int_int.blk</a>, <a href="../Tjr_btree__Make_6/Examples/Int_int/index.html#type-wbc">Make_6.Examples.Int_int.wbc</a>)</span> <a href="../Tjr_btree__Make_6/index.html#type-btree_factory">Tjr_btree__Make_6.btree_factory</a></span>; int_r_factory : <span><span>(<a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-k">Make_6.Examples.Int_r.k</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-v">Make_6.Examples.Int_r.v</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-r">Make_6.Examples.Int_r.r</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-t">Make_6.Examples.Int_r.t</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-leaf">Make_6.Examples.Int_r.leaf</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-node">Make_6.Examples.Int_r.node</a>, <span><span>(<a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-node">Make_6.Examples.Int_r.node</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-leaf">Make_6.Examples.Int_r.leaf</a>)</span> Isa_btree.dnode</span>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-ls">Make_6.Examples.Int_r.ls</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-blk">Make_6.Examples.Int_r.blk</a>, <a href="../Tjr_btree__Make_6/Examples/Int_r/index.html#type-wbc">Make_6.Examples.Int_r.wbc</a>)</span> <a href="../Tjr_btree__Make_6/index.html#type-btree_factory">Tjr_btree__Make_6.btree_factory</a></span>; &gt;</code></dt></dl></section><section><header><h3 id="bin-prot-marshalling"><a href="#bin-prot-marshalling" class="anchor"></a>Bin prot marshalling</h3></header><dl><dt class="spec module" id="module-Bin_prot_marshalling"><a href="#module-Bin_prot_marshalling" class="anchor"></a><code><span class="keyword">module</span> <a href="Bin_prot_marshalling/index.html">Bin_prot_marshalling</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Marshal frames to blocks using binprot FIXME needs polish. Currently assumes that blk_ids are ints.</p></dd></dl></section><section><header><h3 id="misc"><a href="#misc" class="anchor"></a>Misc</h3></header><div class="spec module" id="module-Debug_"><a href="#module-Debug_" class="anchor"></a><code><span class="keyword">module</span> <a href="Debug_/index.html">Debug_</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></div></section></div></body></html>
