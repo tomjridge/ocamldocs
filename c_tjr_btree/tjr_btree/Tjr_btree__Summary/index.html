@@ -61,8 +61,11 @@ type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
     blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
     blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
     init_btree_root : 'r -&gt; 
-    ('k,'v,'r,'ls,'t) map_ops_with_ls;
-
+    &lt; 
+      get_btree_root  : unit -&gt; ('r,'t)m;
+      map_ops_with_ls : ('k,'v,'r,'ls,'t) map_ops_with_ls
+    &gt;;
+  
   cached:
     blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
     blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
