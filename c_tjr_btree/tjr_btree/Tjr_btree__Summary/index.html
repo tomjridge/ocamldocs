@@ -72,6 +72,7 @@ type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
     wbc_params      : wbc_params -&gt;  
     init_btree_root : 'r -&gt; 
     &lt;
+      get_btree_root  : unit -&gt; ('r,'t)m;
       flush_wbc       : unit -&gt; (unit,'t)m;
       (* sync_key        : 'k -&gt; (unit,'t)m; *)
       map_ops_with_ls : ('k,'v,'r,'ls,'t) map_ops_with_ls;
