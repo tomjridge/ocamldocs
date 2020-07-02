@@ -1,5 +1,39 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_impfs.Tjr_impfs.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_impfs</a> &#x00BB; <a href="../index.html">Tjr_impfs</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_impfs.Summary</code></h1><nav class="toc"><ul><li><a href="#file-interface">File interface</a></li><li><a href="#v1-interfaces">V1 interfaces</a></li></ul></nav></header><aside><p>Summary of main interfaces</p></aside><section><header><h3 id="file-interface"><a href="#file-interface" class="anchor"></a>File interface</h3><pre><code class="ml">(** Construct file operations.
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_impfs.Tjr_impfs.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_impfs</a> &#x00BB; <a href="../index.html">Tjr_impfs</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_impfs.Summary</code></h1><nav class="toc"><ul><li><a href="#usedlist-interface">Usedlist interface</a></li><li><a href="#file-interface">File interface</a></li><li><a href="#dir-interface">Dir interface</a></li><li><a href="#v1-interfaces">V1 interfaces</a></li></ul></nav></header><aside><p>Summary of main interfaces</p></aside><section><header><h3 id="usedlist-interface"><a href="#usedlist-interface" class="anchor"></a>Usedlist interface</h3><pre><code class="ml">type ('blk_id,'blk,'t) usedlist_factory = &lt;
+  
+  (* NOTE we don't implement origin read/write because usedlists are
+     always used in conjunction with some other object, which will
+     take care of persisting the origin information; this object is
+     also in charge of issuing sync calls to the blk dev when
+     necessary *)
+  
+  with_: 
+    blk_dev_ops  : ('blk_id,'blk,'t) blk_dev_ops -&gt; 
+    barrier      : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops : ('blk_id,'t) blk_allocator_ops -&gt; 
+    &lt;
+      usedlist_ops : 'blk_id Usedlist.origin -&gt; (('blk_id,'t) Usedlist.ops,'t)m;
+      
+      alloc_via_usedlist : 
+        ('blk_id,'t) Usedlist.ops -&gt;         
+        ('blk_id,'t)blk_allocator_ops;
+            
+    &gt;;
+
+&gt;
+
+  (** usedlist_ops: The operations provided by the usedlist; in
+     addition we need to integrate the freelist with the usedlist:
+     alloc_via_usedlist
+
+      NOTE a sync is just a flush followed by a sync of the underlying
+     blkdev, since we assume all object operations are routed to the
+     same blkdev *)      
+  type ('blk_id,'t) usedlist_ops = {
+    add        : 'blk_id -&gt; (unit,'t)m;    
+    get_origin : unit -&gt; ('blk_id origin,'t)m;
+    flush      : unit -&gt; (unit,'t)m;
+  }</code></pre></header></section><section><header><h3 id="file-interface"><a href="#file-interface" class="anchor"></a>File interface</h3><pre><code class="ml">(** Construct file operations.
 
 Sequence of steps:
 
@@ -98,20 +132,7 @@ type ('buf,'t) file_ops = {
     file_size        : int; (* in bytes of course *)
     blk_idx_map_root : 'blk_id;
     usedlist_origin  : 'blk_id Usedlist.origin;
-  }[@@deriving bin_io]
-
-  (** usedlist_ops: The operations provided by the usedlist; in addition we need to
-     integrate the freelist with the usedlist: alloc_via_usedlist 
-
-      NOTE a sync is just a flush followed by a sync of the underlying
-     blkdev, since we assume all object operations are routed to the
-     same blkdev
-  *)      
-  type ('blk_id,'t) usedlist_ops = {
-    add        : 'blk_id -&gt; (unit,'t)m;    
-    get_origin : unit -&gt; ('blk_id origin,'t)m;
-    flush      : unit -&gt; (unit,'t)m;
-  }</code></pre><pre># Additional notes for File_impl_v2.
+  }[@@deriving bin_io]</code></pre><pre># Additional notes for File_impl_v2.
 
 We have multiple different objects that may asynchronously flush
 to disk. How do we know that the assembly is crash-safe?
@@ -166,7 +187,57 @@ the block device.
 If we want to sync the file, we can simply flush it (including the
 origin block) and then sync the block device. But this is the only
 point at which we need to sync (and we hope that the block device
-handles barriers efficiently).</pre></header></section><section><header><h3 id="v1-interfaces"><a href="#v1-interfaces" class="anchor"></a>V1 interfaces</h3><pre><code class="ml">(** Very basic types *)
+handles barriers efficiently).</pre></header></section><section><header><h3 id="dir-interface"><a href="#dir-interface" class="anchor"></a>Dir interface</h3><pre><code class="ml">(** NOTE 'de stands for dir_entry *)
+type ('blk_id,'blk,'de,'t) dir_factory = &lt;
+  read_origin: 
+    blk_dev_ops : ('blk_id,'blk,'t) blk_dev_ops -&gt; 
+    blk_id : 'blk_id -&gt; 
+    ('blk_id Dir_origin.t,'t)m;
+
+  write_origin:
+    blk_dev_ops : ('blk_id,'blk,'t) blk_dev_ops -&gt; 
+    blk_id : 'blk_id -&gt; 
+    origin: 'blk_id Dir_origin.t -&gt; 
+    (unit,'t)m;
+    
+  with_: 
+    blk_dev_ops  : ('blk_id,'blk,'t) blk_dev_ops -&gt; 
+    barrier      : (unit -&gt; (unit,'t)m) -&gt; 
+    sync         : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops : ('blk_id,'t) blk_allocator_ops -&gt; 
+    &lt;    
+      usedlist_ops : 'blk_id Usedlist.origin -&gt; (('blk_id,'t) Usedlist.ops,'t)m;
+
+      alloc_via_usedlist : 
+        ('blk_id,'t) Usedlist.ops -&gt;         
+        ('blk_id,'t)blk_allocator_ops;
+      
+      mk_dir  : 
+        usedlist     : ('blk_id,'t) Usedlist.ops -&gt;        
+        dir_map_root : 'blk_id -&gt; 
+        origin       : 'blk_id -&gt;
+        (str_256,'de,'blk_id,'t)Dir.t;
+
+      (* Convenience *)
+      
+      dir_from_origin_blk: 'blk_id Dir_origin.t -&gt; ((str_256,'de,'blk_id,'t)Dir.t,'t)m;
+
+      dir_from_origin: 'blk_id -&gt; ((str_256,'de,'blk_id,'t)Dir.t,'t)m;
+    &gt;;  
+&gt;
+
+  type ('k,'v,'r,'t) dir_ops = {
+    find     : 'k -&gt; ('v option,'t) m;
+    insert   : 'k -&gt; 'v -&gt; (unit,'t) m;
+    delete   : 'k -&gt; (unit,'t) m;
+    flush    : unit -&gt; (unit,'t)m;
+    sync     : unit -&gt; (unit,'t)m;
+  }
+
+  type 'blk_id dir_origin = {
+    dir_map_root: 'blk_id;
+    usedlist_origin: 'blk_id Usedlist.origin;
+  }[@@deriving bin_io]</code></pre></header></section><section><header><h3 id="v1-interfaces"><a href="#v1-interfaces" class="anchor"></a>V1 interfaces</h3><pre><code class="ml">(** Very basic types *)
 module type S0 = sig
   type t
   val monad_ops: t monad_ops
