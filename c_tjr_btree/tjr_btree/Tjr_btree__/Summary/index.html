@@ -24,6 +24,10 @@ type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
 
   dnode_mshlr : blk_sz -&gt; ('dnode, 'blk) dnode_mshlr;
 
+  write_empty_leaf: 
+    blk_dev_ops : ('r, 'blk, 't) blk_dev_ops -&gt; 
+    blk_id : 'r -&gt; 
+    (unit,'t)m;
 
   (* Store layer *)
 
