@@ -29,13 +29,23 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
     blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
     barrier     : (unit -&gt; (unit,'t)m)
     -&gt; &lt;
+      (* NOTE plist is very explicit about blk_ids (because it is used
+         as the basis for the freelist); so we don't assume a freelist
+         here, instead we require fresh blk_ids to be passed
+         explicitly *)
       init : &lt;
-        (* FIXME rename to &quot;initialize_empty_blk&quot; or similar *)
-        mk_empty     : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
+        (* FIXME use create method instead *)
+        (* mk_empty_     : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m; *)
+
+        (* NOTE this does not create an origin blk *)
+        create       : 'blk_id -&gt; (('blk_id,'buf)plist,'t)m;
 
         read_from_hd : 'blk_id -&gt; ( ('a list * 'blk_id option) list, 't) m; 
 
+        (* FIXME this should follow pointers from the tl if any *)
         from_endpts  : 'blk_id pl_origin -&gt; (('blk_id,'buf)plist,'t)m;
+
+
       &gt;;
 
       with_state : 
