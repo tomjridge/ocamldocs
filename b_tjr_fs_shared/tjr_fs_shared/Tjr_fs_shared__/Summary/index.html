@@ -1,13 +1,65 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_fs_shared.Tjr_fs_shared__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_fs_shared</a> &#x00BB; <a href="../index.html">Tjr_fs_shared__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_fs_shared__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('r,'blk,'buf,'t) shared_ctxt = {
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_fs_shared.Tjr_fs_shared__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_fs_shared</a> &#x00BB; <a href="../index.html">Tjr_fs_shared__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_fs_shared__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">  type ('blk_id,'t) blk_allocator_ops = {
+    blk_alloc : unit -&gt; ('blk_id,'t) m; 
+    blk_free  : 'blk_id -&gt; (unit,'t) m;
+  }
+
+type ('blk_id,'blk,'t,'fd) blk_dev_impl = &lt;
+  add_debug : 
+    ('blk_id,'blk,'t)blk_dev_ops -&gt; 
+    ('blk_id,'blk,'t)blk_dev_ops;
+
+  add_profiling: 
+    ('blk_id,'blk,'t)blk_dev_ops -&gt; 
+    ('blk_id,'blk,'t)blk_dev_ops;
+
+  with_ : blk_sz:blk_sz -&gt; &lt;
+      from_fd: 'fd -&gt; 
+        &lt;
+          blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops;
+          fd          : 'fd;
+          sync        : unit -&gt; (unit,'t)m;
+          close       : unit -&gt; (unit,'t)m;
+        &gt;;
+    &gt;
+&gt;    
+
+  type ('blk_id,'blk,'t) blk_dev_ops = {
+    blk_sz     : blk_sz; 
+    write      : blk_id:'blk_id -&gt; blk:'blk -&gt; (unit,'t) m;
+    read       : blk_id:'blk_id -&gt; ('blk,'t) m;
+    write_many : ('blk_id*'blk)list -&gt; (unit,'t) m  (* FIXME may want to make this a seq? *)
+  }
+
+  type ('blk,'buf) blk_ops = {
+    blk_sz: blk_sz;
+    blk_to_buf: 'blk -&gt; 'buf;
+    buf_to_blk: 'buf -&gt; 'blk;
+  }
+
+type 'buf buf_ops = {
+  buf_create         : int -&gt; 'buf;
+  buf_length         : 'buf -&gt; int;
+
+  buf_to_string      : src:'buf -&gt; off:offset -&gt; len:len -&gt; string; 
+  to_string          : 'buf -&gt; string;
+  of_string          : string -&gt; 'buf;
+  of_bytes           : bytes -&gt; 'buf;
+
+  blit               : src:'buf   -&gt; src_off:offset -&gt; src_len:len -&gt; dst:'buf -&gt; dst_off:offset -&gt; 'buf;
+  blit_bytes_to_buf  : src:bytes  -&gt; src_off:offset -&gt; src_len:len -&gt; dst:'buf -&gt; dst_off:offset -&gt; 'buf;
+  blit_string_to_buf : src:string -&gt; src_off:offset -&gt; src_len:len -&gt; dst:'buf -&gt; dst_off:offset -&gt; 'buf;
+}
+
+type ('r,'blk,'buf,'t) shared_ctxt = {
   r_cmp      : 'r -&gt; 'r -&gt; int;
   r_size     :int;
-  buf_ops    :'buf Buf_ops.buf_ops;
+  buf_ops    :'buf buf_ops;
   monad_ops  : 't monad_ops;
   async      : 't async;
   event_ops  : 't event_ops;
-  blk_ops    : 'blk Blk_intf.blk_ops;
-  blk_sz     : Blk_intf.blk_sz;
+  blk_ops    : ('blk,'buf) blk_ops;
+  blk_sz     : blk_sz;
   buf_to_blk : 'buf -&gt; 'blk;
   blk_to_buf : 'blk -&gt; 'buf;
   buf_create : unit -&gt; 'buf;
