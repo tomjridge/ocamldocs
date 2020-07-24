@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_btree.Tjr_btree__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_btree</a> &#x00BB; <a href="../index.html">Tjr_btree__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_btree__.Summary</code></h1></header><aside><p><code>Make_6</code> main interfaces:</p><pre><code class="ml">module type S = sig
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_btree.Tjr_btree__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_btree</a> &#x00BB; <a href="../index.html">Tjr_btree__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_btree__.Summary</code></h1><nav class="toc"><ul><li><a href="#note-about-crash-correctness">Note about crash correctness</a></li></ul></nav></header><aside><p><code>Make_6</code> main interfaces:</p><pre><code class="ml">module type S = sig
   type k
   type v
   type r
@@ -61,6 +61,7 @@ type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
 
   (* Convenience *)
 
+  (* NOTE this does not initialize init_btree_root *)
   uncached:
     blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
     blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
@@ -70,6 +71,7 @@ type ('k,'v,'r,'t,'leaf,'node,'dnode,'ls,'blk,'wbc) btree_factory = &lt;
       map_ops_with_ls : ('k,'v,'r,'ls,'t) map_ops_with_ls
     &gt;;
   
+  (* NOTE this does not initialize init_btree_root *)
   cached:
     blk_dev_ops     : ('r, 'blk, 't) blk_dev_ops -&gt; 
     blk_alloc       : ('r, 't) blk_allocator_ops -&gt; 
@@ -96,4 +98,4 @@ type ('dnode,'blk) dnode_mshlr = {
     insert_many     : k:'k -&gt; v:'v -&gt; kvs:('k * 'v) list -&gt; (('k * 'v) list, 't) m;
     insert_all      : kvs:('k * 'v) list -&gt; (unit, 't) m;    
     leaf_stream_ops : ('k,'v,'r,'ls,'t)Isa_btree_intf.leaf_stream_ops;
-  }</code></pre></aside></div></body></html>
+  }</code></pre></aside><section><header><h3 id="note-about-crash-correctness"><a href="#note-about-crash-correctness" class="anchor"></a>Note about crash correctness</h3><p>Essentially we have to assume that the B-tree writes hit disk in order (ie there is a barrier operation after each write).</p><p>In order to make the B-tree fast, we have to use a persistent cache in front.</p><p>Fortunately, providing we have the persistent cache, I believe/hope (but have certainly not proved) that the combination (pcache+btree) is crash safe. The reason is that if we crash in the middle of modifying the B-tree, we can replay the operations from the pcache, and this has the effect of fixing up the B-tree.</p><p>The persistent cache is on github, as &quot;tjr_pcache&quot;.</p></header></section></div></body></html>
