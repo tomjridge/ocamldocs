@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_pcache (tjr_pcache.Tjr_pcache)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_pcache</a> &#x00BB; Tjr_pcache</nav><h1>Module <code>Tjr_pcache</code></h1><p>Persistent cache functionality.</p></header><dl><dt class="spec module" id="module-Pcache_intf"><a href="#module-Pcache_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Pcache_intf/index.html">Pcache_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main pcache interfaces; don't open</p></dd></dl><dl><dt class="spec type" id="type-pcache_ops"><a href="#type-pcache_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('k, 'v, 'r, 'kvop_map, 't) pcache_ops</span></code><code> = <span><span>(<span class="type-var">'k</span>, <span class="type-var">'v</span>, <span class="type-var">'r</span>, <span class="type-var">'kvop_map</span>, <span class="type-var">'t</span>)</span> <a href="Pcache_intf/index.html#type-pcache_ops">Pcache_intf.pcache_ops</a></span></code></dt></dl><dl><dt class="spec module" id="module-Make"><a href="#module-Make" class="anchor"></a><code><span class="keyword">module</span> <a href="Make/index.html">Make</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Pcache constructor functions, including on-disk format etc</p></dd></dl><aside><pre><code class="ml">(** Make functor argument sig, including types and values *)
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Tjr_pcache (tjr_pcache.Tjr_pcache)</title><link rel="stylesheet" href="../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../index.html">tjr_pcache</a> &#x00BB; Tjr_pcache</nav><h1>Module <code>Tjr_pcache</code></h1><p>Persistent cache functionality.</p></header><div><div class="spec include"><div class="doc"><details open="open"><summary><span class="def"><code><span class="keyword">include</span> <a href="../Tjr_pcache__/index.html#module-Summary">Tjr_pcache__.Summary</a></code></span></summary><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">(** Make functor argument sig, including types and values *)
 module type S = sig
   type t
   val monad_ops: t monad_ops
@@ -10,7 +10,8 @@ module type S = sig
   type blk_id = r
   type blk
 
-  val blk_ops: blk blk_ops
+  val blk_ops: (blk,buf) blk_ops
+  val buf_ops: buf buf_ops
   val k_cmp: k -&gt; k -&gt; int
 
   val k_mshlr: k bp_mshlr
@@ -19,6 +20,30 @@ module type S = sig
 
 end
 
+  type ('k,'v,'r,'kvop_map) detach_info = { 
+    root_ptr    : 'r;
+    past_map    : 'kvop_map;
+    current_ptr : 'r;
+    current_map : 'kvop_map;
+  }
+
+type ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory = &lt;
+  kvop_map_ops: ('k,('k,'v)kvop,'kvop_map) Tjr_map.map_ops;
+
+  empty_pcache_state: ptr:'r -&gt; ('r,'kvop_map)pcache_state;
+  (** NOTE this does not access disk *)
+
+  with_read_blk_as_buf: 
+    read_blk_as_buf : ('r -&gt; ('buf,'t) m) -&gt;
+    flush_tl        : (('r,'kvop_map)pcache_state -&gt; (unit,'t)m) -&gt;
+    ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1;
+  (** NOTE flush_tl is used to write to disk *)
+
+  with_blk_dev_ops: 
+    blk_dev_ops : ('r,'buf,'t)blk_dev_ops -&gt; (* NOTE this requires 'buf as 'blk *)
+    ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1;
+  (** NOTE blk_dev_ops is used to provide [flush_tl] *)
+&gt;    
 
 type ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1 = &lt;
   read_pcache: 
@@ -48,21 +73,24 @@ type ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1 = &lt;
   &gt;
 &gt;
 
+  type ('k,'v,'r,'kvop_map,'t) pcache_ops = {
+    find         : 'k -&gt; ('v option,'t) m;
+    insert       : 'k -&gt; 'v -&gt; (unit,'t) m;
+    delete       : 'k -&gt; (unit,'t)m;
+    detach       : unit -&gt; ( ('k,'v,'r,'kvop_map) detach_info, 't) m;
+    blk_len      : unit -&gt; (int,'t)m;
+    pcache_write : unit -&gt; (unit,'t)m;
+    pcache_sync  : unit -&gt; (unit,'t)m;
+  }
 
-type ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory = &lt;
-  kvop_map_ops: ('k,('k,'v)kvop,'kvop_map) Tjr_map.map_ops;
-
-  empty_pcache_state: ptr:'r -&gt; ('r,'kvop_map)pcache_state;
-  (** NOTE this does not access disk *)
-
-  with_read_blk_as_buf: 
-    read_blk_as_buf : ('r -&gt; ('buf,'t) m) -&gt;
-    flush_tl        : (('r,'kvop_map)pcache_state -&gt; (unit,'t)m) -&gt;
-    ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1;
-  (** NOTE flush_tl is used to write to disk *)
-
-  with_blk_dev_ops: 
-    blk_dev_ops : ('r,'buf,'t)blk_dev_ops -&gt; (* NOTE this requires 'buf as 'blk *)
-    ('k,'v,'r,'buf,'kvop_map,'t) pcache_factory_1;
-  (** NOTE blk_dev_ops is used to provide [flush_tl] *)
-&gt;    </code></pre></aside></div></body></html>
+  type ('r,'kvop_map) pcache_state = {
+    root_ptr    : 'r;
+    past_map    : 'kvop_map;
+    current_ptr : 'r;
+    current_map : 'kvop_map;
+    buf         : ba_buf;  (* should be the same size as a blk *)
+    buf_pos     : int;
+    next_ptr    : 'r option; 
+    blk_len     : int;
+    dirty       : bool; (* only if buf is dirty ie data changed, or next_ptr *)
+  }</code></pre></aside></details></div></div></div><dl><dt class="spec module" id="module-Pcache_intf"><a href="#module-Pcache_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Pcache_intf/index.html">Pcache_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Main pcache interfaces; don't open (defines buf and buf_ops)</p></dd></dl><div class="spec module" id="module-Detach_info"><a href="#module-Detach_info" class="anchor"></a><code><span class="keyword">module</span> Detach_info = <a href="Pcache_intf/index.html#module-Detach_info">Pcache_intf.Detach_info</a></code></div><div class="spec module" id="module-Pcache_ops"><a href="#module-Pcache_ops" class="anchor"></a><code><span class="keyword">module</span> Pcache_ops = <a href="Pcache_intf/index.html#module-Pcache_ops">Pcache_intf.Pcache_ops</a></code></div><div class="spec module" id="module-Pcache_state"><a href="#module-Pcache_state" class="anchor"></a><code><span class="keyword">module</span> Pcache_state = <a href="Pcache_intf/index.html#module-Pcache_state">Pcache_intf.Pcache_state</a></code></div><dl><dt class="spec value" id="val-empty_pcache_state"><a href="#val-empty_pcache_state" class="anchor"></a><code><span class="keyword">val</span> empty_pcache_state : <span>ptr:<span class="type-var">'a</span></span> <span>&#45;&gt;</span> <span>empty:<span class="type-var">'b</span></span> <span>&#45;&gt;</span> <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="Pcache_intf/index.html#type-pcache_state">Pcache_intf.pcache_state</a></span></code></dt></dl><dl><dt class="spec type" id="type-pcache_ops"><a href="#type-pcache_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('k, 'v, 'r, 'kvop_map, 't) pcache_ops</span></code><code> = <span><span>(<span class="type-var">'k</span>, <span class="type-var">'v</span>, <span class="type-var">'r</span>, <span class="type-var">'kvop_map</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_pcache__Pcache_intf/Pcache_ops/index.html#type-pcache_ops">Pcache_ops.pcache_ops</a></span></code></dt></dl><dl><dt class="spec module" id="module-Make"><a href="#module-Make" class="anchor"></a><code><span class="keyword">module</span> <a href="Make/index.html">Make</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Pcache constructor functions, including on-disk format etc</p></dd></dl></div></body></html>
