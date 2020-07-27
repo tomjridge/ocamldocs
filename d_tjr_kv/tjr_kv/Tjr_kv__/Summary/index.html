@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_kv.Tjr_kv__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_kv</a> &#x00BB; <a href="../index.html">Tjr_kv__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_kv__.Summary</code></h1><nav class="toc"><ul><li><a href="#architecture">Architecture</a></li><li><a href="#main-interfaces">Main interfaces</a></li></ul></nav></header><aside><p>Summary</p></aside><section><header><h3 id="architecture"><a href="#architecture" class="anchor"></a>Architecture</h3><p> 
+
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vSnTmJGnVDyxnrBZ_VOVZ7T0O9etqZa-BDPu-EPH9ziiNjY375TMgO-ENB9UO4e-HT3qmtbJKvFOFl0/pub?w=453&amp;h=373">
+
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vTIXhyNa7dovQYXuJXBMwPQZU99-x_tRdTIH3SkMUDyPwbL31zExWXauT2hO-eRIUcnGP3RVHiSHrjt/pub?w=557&amp;h=428">
+
+ See <a href="../Kv_store_with_lru/index.html"><code>Kv_store_with_lru</code></a> for more details</p></header></section><section><header><h3 id="main-interfaces"><a href="#main-interfaces" class="anchor"></a>Main interfaces</h3><pre><code class="ml">module type S = sig
+  type k[@@deriving bin_io]
+  type v[@@deriving bin_io]
+  val k_cmp: k -&gt; k -&gt; int
+  type r = Shared_ctxt.r[@@deriving bin_io]
+
+  val k_size: int
+  val v_size: int
+  val r_size: int
+end
+module type S' = sig
+  (* NOTE specialized to shared_ctxt *)
+  type k
+  type v
+  val k_cmp: k -&gt; k -&gt; int
+  val k_mshlr: k bp_mshlr
+  val v_mshlr: v bp_mshlr
+end
+
+type ('k,'v) kv_store = &lt;
+  blk_alloc     : (r, t) blk_allocator_ops;
+  btree_thread  : &lt; start_btree_thread : unit -&gt; (unit, t)m &gt;;
+  lru_ops       : ('k, 'v, t) mt_ops;
+  min_free      : min_free;
+  pcache_thread : &lt; start_pcache_thread : unit -&gt; (unit, t)m &gt;;
+  q_lru_pc      : ('k, 'v, t) q_lru_pc;
+  q_pc_bt       : ('k, 'v, t) q_pc_bt;
+  root_man      : (rt_blk, t) root_man; 
+  rt_blk        : rt_blk 
+&gt;</code></pre></header></section></div></body></html>
