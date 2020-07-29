@@ -63,8 +63,25 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
       add_origin : 
         &lt;set_and_sync: 'blk_id pl_origin -&gt; (unit,'t)m&gt; -&gt; 
         ('a,'buf,'blk_id,'t)plist_ops -&gt; 
-        ('a,'buf,'blk_id,'t)plist_ops
-    (** Modify plist_ops to sync the origin block when hd/tl change *)
+        ('a,'buf,'blk_id,'t)plist_ops;
+      (** Modify plist_ops to sync the origin block when hd/tl change *)
+
+
+      (* Convenience *)
+
+      create : 'blk_id -&gt; (&lt;
+          plist_ref  : ('blk_id,'buf)plist ref;              
+          with_plist : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops  : ('a,'buf,'blk_id,'t)plist_ops
+        &gt;,'t)m;
+      (** NOTE no add_origin *)
+
+      restore : 'blk_id Pl_origin.t -&gt; (&lt;
+          plist_ref  : ('blk_id,'buf)plist ref;              
+          with_plist : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops  : ('a,'buf,'blk_id,'t)plist_ops
+        &gt;,'t)m;
+      (** NOTE no add_origin *)
 
     &gt;
 &gt;
@@ -96,15 +113,39 @@ type ('a,'blk_id,'blk,'buf,'t) simple_plist_factory = &lt;
     ('a,'blk_id,'blk,'buf,'t) plist_factory;
 
   convert_to_simple_plist: 
-    monad_ops : 't monad_ops -&gt;
-    freelist_ops : ('blk_id,'t) Shared_freelist.freelist_ops -&gt; 
-    plist_ops : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
-    ('a,'blk_id,'t) simple_plist_ops
+    freelist_ops : ('blk_id,'t) freelist_ops_af -&gt; 
+    plist_ops    : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
+    ('a,'blk_id,'t) simple_plist_ops;
+
+  (* Convenience *)
+
+  with_ : 
+    blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
+    barrier : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops: ('blk_id,'t)freelist_ops_af -&gt; 
+    &lt;
+
+      create: 'blk_id -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+
+      restore: 'blk_id Pl_origin.t -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+    &gt;
 &gt;
 
 type ('a,'blk_id,'t) simple_plist_ops = {
-  add           : 'a -&gt; (unit,'t)m;
+  add           : 'a -&gt; (bool,'t)m;
+  (** Return value indicates whether we moved to a new block *)
+
   sync_tl       : unit -&gt; (unit,'t)m;
   blk_len       : unit -&gt; (int,'t)m;
   get_origin    : unit -&gt; ('blk_id pl_origin,'t)m;
-}</code></pre></aside></details></div></div></div><dl><dt class="spec module" id="module-Plist_intf"><a href="#module-Plist_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Plist_intf/index.html">Plist_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Plist main types</p></dd></dl><div class="spec module" id="module-Pl_origin"><a href="#module-Pl_origin" class="anchor"></a><code><span class="keyword">module</span> Pl_origin = <a href="Plist_intf/index.html#module-Pl_origin">Plist_intf.Pl_origin</a></code></div><dl><dt class="spec type" id="type-plist_ops"><a href="#type-plist_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'buf, 'blk_id, 't) plist_ops</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'buf</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'t</span>)</span> <a href="Plist_intf/index.html#type-plist_ops">Plist_intf.plist_ops</a></span></code></dt><dt class="spec type" id="type-plist_factory"><a href="#type-plist_factory" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 'blk, 'buf, 't) plist_factory</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'blk</span>, <span class="type-var">'buf</span>, <span class="type-var">'t</span>)</span> <a href="Plist_intf/index.html#type-plist_factory">Plist_intf.plist_factory</a></span></code></dt></dl><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Construct a persistent list (most generic version, not concurrent-safe).</p></dd></dl><dl><dt class="spec value" id="val-pl_examples"><a href="#val-pl_examples" class="anchor"></a><code><span class="keyword">val</span> pl_examples : &lt; for_blk_id : <span>Tjr_fs_shared.Shared_ctxt.r <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; for_int : <span>int <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; for_int_int_kvop : <span><span><span>(int, int)</span> Tjr_fs_shared.kvop</span> <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; origin_factory : <span><span>(Tjr_fs_shared.Shared_ctxt.r, Tjr_fs_shared.Pvt_bin_prot_marshalling.ba_buf, Tjr_monad.With_lwt.lwt)</span> <a href="Plist_intf/index.html#type-origin_factory">Plist_intf.origin_factory</a></span>; &gt;</code></dt></dl><div class="spec module" id="module-Make_simple_plist"><a href="#module-Make_simple_plist" class="anchor"></a><code><span class="keyword">module</span> Make_simple_plist = <a href="../Tjr_plist__/index.html#module-Make_2">Tjr_plist__.Make_2</a></code></div><dl><dt class="spec type" id="type-simple_plist_factory"><a href="#type-simple_plist_factory" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 'blk, 'buf, 't) simple_plist_factory</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'blk</span>, <span class="type-var">'buf</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Make_simple_plist.simple_plist_factory</a></span></code></dt><dt class="spec type" id="type-simple_plist_ops"><a href="#type-simple_plist_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 't) simple_plist_ops</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_ops">Make_simple_plist.simple_plist_ops</a></span></code></dt></dl><dl><dt class="spec value" id="val-simple_pl_examples"><a href="#val-simple_pl_examples" class="anchor"></a><code><span class="keyword">val</span> simple_pl_examples : &lt; for_int : <span><span>(int, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk_id, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk, Tjr_fs_shared.ba_buf, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.t)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Tjr_plist__.Make_2.simple_plist_factory</a></span>; for_int_int_kvop : <span><span>(<span><span>(int, int)</span> Tjr_fs_shared.kvop</span>, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk_id, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk, Tjr_fs_shared.ba_buf, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.t)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Tjr_plist__.Make_2.simple_plist_factory</a></span>; &gt;</code></dt></dl><aside><p>NOTE hidden doc for module <code>Pl_type_abbrevs</code></p></aside></div></body></html>
+}</code></pre></aside></details></div></div></div><dl><dt class="spec module" id="module-Plist_intf"><a href="#module-Plist_intf" class="anchor"></a><code><span class="keyword">module</span> <a href="Plist_intf/index.html">Plist_intf</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Plist main types</p></dd></dl><div class="spec module" id="module-Pl_origin"><a href="#module-Pl_origin" class="anchor"></a><code><span class="keyword">module</span> Pl_origin = <a href="Plist_intf/index.html#module-Pl_origin">Plist_intf.Pl_origin</a></code></div><dl><dt class="spec type" id="type-plist_ops"><a href="#type-plist_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'buf, 'blk_id, 't) plist_ops</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'buf</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'t</span>)</span> <a href="Plist_intf/index.html#type-plist_ops">Plist_intf.plist_ops</a></span></code></dt><dt class="spec type" id="type-plist_factory"><a href="#type-plist_factory" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 'blk, 'buf, 't) plist_factory</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'blk</span>, <span class="type-var">'buf</span>, <span class="type-var">'t</span>)</span> <a href="Plist_intf/index.html#type-plist_factory">Plist_intf.plist_factory</a></span></code></dt></dl><dl><dt class="spec module" id="module-Make_1"><a href="#module-Make_1" class="anchor"></a><code><span class="keyword">module</span> <a href="Make_1/index.html">Make_1</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code></dt><dd><p>Construct a persistent list (most generic version, not concurrent-safe).</p></dd></dl><dl><dt class="spec value" id="val-pl_examples"><a href="#val-pl_examples" class="anchor"></a><code><span class="keyword">val</span> pl_examples : &lt; for_blk_id : <span>Tjr_fs_shared.Shared_ctxt.r <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; for_int : <span>int <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; for_int_int_kvop : <span><span><span>(int, int)</span> Tjr_fs_shared.kvop</span> <a href="Pl_type_abbrevs/index.html#type-plist_factory">Pl_type_abbrevs.plist_factory</a></span>; origin_factory : <span><span>(Tjr_fs_shared.Shared_ctxt.r, Tjr_fs_shared.Pvt_bin_prot_marshalling.ba_buf, Tjr_monad.With_lwt.lwt)</span> <a href="Plist_intf/index.html#type-origin_factory">Plist_intf.origin_factory</a></span>; &gt;</code></dt></dl><div class="spec module" id="module-Make_simple_plist"><a href="#module-Make_simple_plist" class="anchor"></a><code><span class="keyword">module</span> Make_simple_plist = <a href="../Tjr_plist__/index.html#module-Make_2">Tjr_plist__.Make_2</a></code></div><dl><dt class="spec type" id="type-freelist_ops_af"><a href="#type-freelist_ops_af" class="anchor"></a><code><span class="keyword">type</span> <span>('blk_id, 't) freelist_ops_af</span></code><code> = <span><span>(<span class="type-var">'blk_id</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_plist__/Make_2/index.html#type-freelist_ops_af">Tjr_plist__.Make_2.freelist_ops_af</a></span></code></dt><dt class="spec type" id="type-simple_plist_factory"><a href="#type-simple_plist_factory" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 'blk, 'buf, 't) simple_plist_factory</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'blk</span>, <span class="type-var">'buf</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Make_simple_plist.simple_plist_factory</a></span></code></dt><dt class="spec type" id="type-simple_plist_ops"><a href="#type-simple_plist_ops" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'blk_id, 't) simple_plist_ops</span></code><code> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'blk_id</span>, <span class="type-var">'t</span>)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_ops">Make_simple_plist.simple_plist_ops</a></span></code></dt></dl><dl><dt class="spec value" id="val-simple_pl_examples"><a href="#val-simple_pl_examples" class="anchor"></a><code><span class="keyword">val</span> simple_pl_examples : &lt; for_int : <span><span>(int, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk_id, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk, Tjr_fs_shared.ba_buf, Tjr_monad.With_lwt.lwt)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Tjr_plist__.Make_2.simple_plist_factory</a></span>; for_int_int_kvop : <span><span>(<span><span>(int, int)</span> Tjr_fs_shared.kvop</span>, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk_id, <a href="index.html#module-Pl_type_abbrevs">Pl_type_abbrevs</a>.blk, Tjr_fs_shared.ba_buf, Tjr_monad.With_lwt.lwt)</span> <a href="../Tjr_plist__/Make_2/index.html#type-simple_plist_factory">Tjr_plist__.Make_2.simple_plist_factory</a></span>; &gt;</code></dt></dl><aside><p>NOTE hidden doc for module <code>Pl_type_abbrevs</code></p></aside></div></body></html>

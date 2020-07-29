@@ -61,8 +61,25 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
       add_origin : 
         &lt;set_and_sync: 'blk_id pl_origin -&gt; (unit,'t)m&gt; -&gt; 
         ('a,'buf,'blk_id,'t)plist_ops -&gt; 
-        ('a,'buf,'blk_id,'t)plist_ops
-    (** Modify plist_ops to sync the origin block when hd/tl change *)
+        ('a,'buf,'blk_id,'t)plist_ops;
+      (** Modify plist_ops to sync the origin block when hd/tl change *)
+
+
+      (* Convenience *)
+
+      create : 'blk_id -&gt; (&lt;
+          plist_ref  : ('blk_id,'buf)plist ref;              
+          with_plist : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops  : ('a,'buf,'blk_id,'t)plist_ops
+        &gt;,'t)m;
+      (** NOTE no add_origin *)
+
+      restore : 'blk_id Pl_origin.t -&gt; (&lt;
+          plist_ref  : ('blk_id,'buf)plist ref;              
+          with_plist : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops  : ('a,'buf,'blk_id,'t)plist_ops
+        &gt;,'t)m;
+      (** NOTE no add_origin *)
 
     &gt;
 &gt;
@@ -94,14 +111,38 @@ type ('a,'blk_id,'blk,'buf,'t) simple_plist_factory = &lt;
     ('a,'blk_id,'blk,'buf,'t) plist_factory;
 
   convert_to_simple_plist: 
-    monad_ops : 't monad_ops -&gt;
-    freelist_ops : ('blk_id,'t) Shared_freelist.freelist_ops -&gt; 
-    plist_ops : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
-    ('a,'blk_id,'t) simple_plist_ops
+    freelist_ops : ('blk_id,'t) freelist_ops_af -&gt; 
+    plist_ops    : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
+    ('a,'blk_id,'t) simple_plist_ops;
+
+  (* Convenience *)
+
+  with_ : 
+    blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
+    barrier : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops: ('blk_id,'t)freelist_ops_af -&gt; 
+    &lt;
+
+      create: 'blk_id -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+
+      restore: 'blk_id Pl_origin.t -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+    &gt;
 &gt;
 
 type ('a,'blk_id,'t) simple_plist_ops = {
-  add           : 'a -&gt; (unit,'t)m;
+  add           : 'a -&gt; (bool,'t)m;
+  (** Return value indicates whether we moved to a new block *)
+
   sync_tl       : unit -&gt; (unit,'t)m;
   blk_len       : unit -&gt; (int,'t)m;
   get_origin    : unit -&gt; ('blk_id pl_origin,'t)m;
