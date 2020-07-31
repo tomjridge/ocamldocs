@@ -1,14 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('blk_id,'blk,'t) origin_factory = &lt;
-  monad_ops :'t monad_ops;
-  with_: 
-    blk_dev_ops: ('blk_id,'blk,'t)blk_dev_ops -&gt; 
-    blk_id : 'blk_id -&gt; 
-    sync_blk_id : (unit -&gt; (unit,'t)m) -&gt;
-    &lt; set_and_sync: 'blk_id pl_origin -&gt; (unit,'t)m &gt;
-&gt;
-
-type ('blk_id,'buf) plist = {
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Summary (tjr_plist.Tjr_plist__.Summary)</title><link rel="stylesheet" href="../../../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 1.5.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – <a href="../../index.html">tjr_plist</a> &#x00BB; <a href="../index.html">Tjr_plist__</a> &#x00BB; Summary</nav><h1>Module <code>Tjr_plist__.Summary</code></h1></header><aside><p>Summary of main types</p></aside><aside><pre><code class="ml">type ('blk_id,'buf) plist = {
   hd      : 'blk_id;
   tl      : 'blk_id;
   buffer  : 'buf;
@@ -83,6 +74,38 @@ type ('a,'blk_id,'blk,'buf,'t) plist_factory = &lt;
 
     &gt;
 &gt;
+type ('a,'blk_id,'blk,'buf,'t) simple_plist_factory = &lt;  
+  plist_factory: 
+    ('a,'blk_id,'blk,'buf,'t) plist_factory;
+
+  convert_to_simple_plist: 
+    freelist_ops : ('blk_id,'t) freelist_ops_af -&gt; 
+    plist_ops    : ('a,'buf,'blk_id,'t) plist_ops -&gt; 
+    ('a,'blk_id,'t) simple_plist_ops;
+
+  (* Convenience *)
+
+  with_ : 
+    blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops -&gt;
+    barrier : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops: ('blk_id,'t)freelist_ops_af -&gt; 
+    &lt;
+
+      create: 'blk_id -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+
+      restore: 'blk_id Pl_origin.t -&gt; (&lt;
+          plist_ref        : ('blk_id,'buf)plist ref;              
+          with_plist       : (('blk_id,'buf)plist,'t)with_state;
+          plist_ops        : ('a,'buf,'blk_id,'t)plist_ops;
+          simple_plist_ops : ('a,'blk_id,'t)simple_plist_ops;      
+        &gt;,'t)m;
+    &gt;
+&gt;
 
   type ('a,'blk_id,'blk,'buf) plist_marshal_info = {
     elt_mshlr     : ('a option,'buf)mshlr;
@@ -104,6 +127,14 @@ type ('a,'buf (* FIXME *),'blk_id, 't) plist_ops = {
 
   read_hd       : unit -&gt; ('a list * 'blk_id option,'t)m;
   append        : ('blk_id,'buf) plist -&gt; (unit,'t)m;
+}
+type ('a,'blk_id,'t) simple_plist_ops = {
+  add           : 'a -&gt; (bool,'t)m;
+  (** Return value indicates whether we moved to a new block *)
+
+  sync_tl       : unit -&gt; (unit,'t)m;
+  blk_len       : unit -&gt; (int,'t)m;
+  get_origin    : unit -&gt; ('blk_id pl_origin,'t)m;
 }
 
 type ('a,'blk_id,'blk,'buf,'t) simple_plist_factory = &lt;  

@@ -7,6 +7,8 @@
   }
 
 type ('a,'k,'v,'r,'buf,'kvop_map,'t) pcache_factory = &lt;
+  (* NOTE the type exposed by this library is slightly different than
+     the above; see the package module Tjr_pcache *)
 
   note_these_types_are_equal : 'a -&gt; ('k,'v)kvop -&gt; unit;
 
@@ -21,7 +23,20 @@ type ('a,'k,'v,'r,'buf,'kvop_map,'t) pcache_factory = &lt;
   plist_to_pcache : 
     simple_plist_ops : ('a,'r,'t)simple_plist_ops -&gt; 
     with_state       : (('r,'kvop_map) pcache_state,'t) with_state -&gt;
-    ('k,'v,'r,'kvop_map,'t) pcache_ops
+    ('k,'v,'r,'kvop_map,'t) pcache_ops;
+  (** NOTE you have to construct the plist first using the
+     simple_plist_factory, then convert to pcache *)
+
+
+  with_ : 
+    blk_dev_ops  : ('r,'buf,'t)blk_dev_ops -&gt;
+    barrier      : (unit -&gt; (unit,'t)m) -&gt; 
+    freelist_ops : ('r,'t) freelist_ops_af -&gt; 
+    &lt;
+      create  : unit -&gt; (('k,'v,'r,'kvop_map,'t) pcache_ops,'t)m;
+      restore : hd:'r -&gt; (('k,'v,'r,'kvop_map,'t) pcache_ops,'t)m;
+      (* NOTE for restore, we only need the hd ptr *)
+    &gt;;
 
 &gt;
 
