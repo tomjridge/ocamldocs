@@ -9,7 +9,7 @@
 * <https://travis-ci.org/github/tomjridge/tjr_lib>
 ![](https://travis-ci.org/tomjridge/tjr_lib.svg?branch=master)
 
-* <https://travis-ci.org/github/tomjridge/tjr_btree>
+* <https://travis-ci.org/github/tomjridge/tjr_btree> (dev branch)
 ![](https://travis-ci.org/tomjridge/tjr_btree.svg?branch=dev)
 
 * <https://travis-ci.org/github/tomjridge/tjr_kv>
@@ -66,24 +66,32 @@
 * 
 * [https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html](https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html)
 
-
 # GitHub links
 
-* <https://github.com/tomjridge/tjr_lib>
-* <https://github.com/tomjridge/tjr_profile>
-* <https://github.com/tomjridge/tjr_monad>
-* <https://github.com/tomjridge/tjr_fs_shared>
-* <https://github.com/tomjridge/tjr_plist>
-* <https://github.com/tomjridge/isa_btree>
-* <https://github.com/tomjridge/tjr_btree>
-* <https://github.com/tomjridge/tjr_lru_cache>
-* <https://github.com/tomjridge/tjr_pcache>
-* <https://github.com/tomjridge/path_resolution> FIXME rename to tjr_path_resolution?
-* <https://github.com/tomjridge/tjr_mem_queue>
-* <https://github.com/tomjridge/tjr_net>
-* <https://github.com/tomjridge/mini-fs> FIXME rename to tjr_minifs
-* <https://github.com/tomjridge/tjr_kv>
-* <https://github.com/tomjridge/imp_fs> FIXME rename to tjr_impfs?
+NOTE we should probably not have any public exes (focus on the libraries). FIXME try to remove env flags from dune files
+
+NOTE by default, Makefile all target (which is the default) should build tests; common Makefile targets: test_exes; run_tests; run_example; update_generated_doc
+
+
+
+| URL                                          | Dockerfile | Tests and examples                                           | Notes                                       |
+| -------------------------------------------- | ---------- | ------------------------------------------------------------ | ------------------------------------------- |
+| <https://github.com/tomjridge/tjr_lib>       | Y          | src-test/ non-public test_main.exe                           | has docs/;                                  |
+| https://github.com/tomjridge/tjr_profile     |            | N                                                            |                                             |
+| https://github.com/tomjridge/tjr_monad       |            | N                                                            |                                             |
+| https://github.com/tomjridge/tjr_fs_shared   |            | Disabled src-examples, src-test; non-public test exe         | docs/                                       |
+| https://github.com/tomjridge/tjr_plist       |            | Non-public test exe (disabled); disabled src-examples        |                                             |
+| https://github.com/tomjridge/isa_btree       |            | Non-public tests (not currently compiling)                   | docs/                                       |
+| https://github.com/tomjridge/tjr_btree       | Y          | src-examples (disabled FIXME);  private main+test exe in bin/ (disabled FIXME) | dev branch                                  |
+| https://github.com/tomjridge/tjr_lru_cache   |            | Non-public test exe                                          |                                             |
+| https://github.com/tomjridge/tjr_pcache      |            | N                                                            |                                             |
+| https://github.com/tomjridge/path_resolution |            | Non-public test exe                                          | docs/; FIXME rename to tjr_path_resolution? |
+| https://github.com/tomjridge/tjr_mem_queue   |            | Non-public src-test exe                                      | docs/                                       |
+| https://github.com/tomjridge/tjr_net         |            | Non-public bin exes                                          | docs/ dir                                   |
+| https://github.com/tomjridge/mini-fs         |            | Non-public bin exes                                          | docs; FIXME rename to tjr_minifs            |
+| https://github.com/tomjridge/tjr_kv          | Y          | Non-public bin exes                                          | docs/                                       |
+| https://github.com/tomjridge/imp_fs          | Y          | Non-public src-test/ exe; non-public bin/ exes; public bin-freelist exe | docs/; FIXME rename to tjr_impfs?           |
+|                                              |            |                                                              |                                             |
 
 
 

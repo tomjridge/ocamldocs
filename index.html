@@ -23,7 +23,7 @@
 <h2 id="travis-builds">Travis builds</h2>
 <ul>
 <li><p><a href="https://travis-ci.org/github/tomjridge/tjr_lib" class="uri">https://travis-ci.org/github/tomjridge/tjr_lib</a> <img src="https://travis-ci.org/tomjridge/tjr_lib.svg?branch=master" /></p></li>
-<li><p><a href="https://travis-ci.org/github/tomjridge/tjr_btree" class="uri">https://travis-ci.org/github/tomjridge/tjr_btree</a> <img src="https://travis-ci.org/tomjridge/tjr_btree.svg?branch=dev" /></p></li>
+<li><p><a href="https://travis-ci.org/github/tomjridge/tjr_btree" class="uri">https://travis-ci.org/github/tomjridge/tjr_btree</a> (dev branch) <img src="https://travis-ci.org/tomjridge/tjr_btree.svg?branch=dev" /></p></li>
 <li><p><a href="https://travis-ci.org/github/tomjridge/tjr_kv" class="uri">https://travis-ci.org/github/tomjridge/tjr_kv</a> <img src="https://travis-ci.org/tomjridge/tjr_kv.svg?branch=master" /></p></li>
 <li><p><a href="https://travis-ci.org/github/tomjridge/tjr_impfs" class="uri">https://travis-ci.org/github/tomjridge/tjr_impfs</a> <img src="https://travis-ci.org/tomjridge/tjr_impfs.svg?branch=master" /></p></li>
 </ul>
@@ -75,23 +75,122 @@
 <li><a href="https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html">https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html</a></li>
 </ul>
 <h1 id="github-links">GitHub links</h1>
-<ul>
-<li><a href="https://github.com/tomjridge/tjr_lib" class="uri">https://github.com/tomjridge/tjr_lib</a></li>
-<li><a href="https://github.com/tomjridge/tjr_profile" class="uri">https://github.com/tomjridge/tjr_profile</a></li>
-<li><a href="https://github.com/tomjridge/tjr_monad" class="uri">https://github.com/tomjridge/tjr_monad</a></li>
-<li><a href="https://github.com/tomjridge/tjr_fs_shared" class="uri">https://github.com/tomjridge/tjr_fs_shared</a></li>
-<li><a href="https://github.com/tomjridge/tjr_plist" class="uri">https://github.com/tomjridge/tjr_plist</a></li>
-<li><a href="https://github.com/tomjridge/isa_btree" class="uri">https://github.com/tomjridge/isa_btree</a></li>
-<li><a href="https://github.com/tomjridge/tjr_btree" class="uri">https://github.com/tomjridge/tjr_btree</a></li>
-<li><a href="https://github.com/tomjridge/tjr_lru_cache" class="uri">https://github.com/tomjridge/tjr_lru_cache</a></li>
-<li><a href="https://github.com/tomjridge/tjr_pcache" class="uri">https://github.com/tomjridge/tjr_pcache</a></li>
-<li><a href="https://github.com/tomjridge/path_resolution" class="uri">https://github.com/tomjridge/path_resolution</a> FIXME rename to tjr_path_resolution?</li>
-<li><a href="https://github.com/tomjridge/tjr_mem_queue" class="uri">https://github.com/tomjridge/tjr_mem_queue</a></li>
-<li><a href="https://github.com/tomjridge/tjr_net" class="uri">https://github.com/tomjridge/tjr_net</a></li>
-<li><a href="https://github.com/tomjridge/mini-fs" class="uri">https://github.com/tomjridge/mini-fs</a> FIXME rename to tjr_minifs</li>
-<li><a href="https://github.com/tomjridge/tjr_kv" class="uri">https://github.com/tomjridge/tjr_kv</a></li>
-<li><a href="https://github.com/tomjridge/imp_fs" class="uri">https://github.com/tomjridge/imp_fs</a> FIXME rename to tjr_impfs?</li>
-</ul>
+<p>NOTE we should probably not have any public exes (focus on the libraries). FIXME try to remove env flags from dune files</p>
+<p>NOTE by default, Makefile all target (which is the default) should build tests; common Makefile targets: test_exes; run_tests; run_example; update_generated_doc</p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 6%" />
+<col style="width: 38%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>URL</th>
+<th>Dockerfile</th>
+<th>Tests and examples</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/tomjridge/tjr_lib" class="uri">https://github.com/tomjridge/tjr_lib</a></td>
+<td>Y</td>
+<td>src-test/ non-public test_main.exe</td>
+<td>has docs/;</td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/tjr_profile</td>
+<td></td>
+<td>N</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/tjr_monad</td>
+<td></td>
+<td>N</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/tjr_fs_shared</td>
+<td></td>
+<td>Disabled src-examples, src-test; non-public test exe</td>
+<td>docs/</td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/tjr_plist</td>
+<td></td>
+<td>Non-public test exe (disabled); disabled src-examples</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/isa_btree</td>
+<td></td>
+<td>Non-public tests (not currently compiling)</td>
+<td>docs/</td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/tjr_btree</td>
+<td>Y</td>
+<td>src-examples (disabled FIXME); private main+test exe in bin/ (disabled FIXME)</td>
+<td>dev branch</td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/tjr_lru_cache</td>
+<td></td>
+<td>Non-public test exe</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/tjr_pcache</td>
+<td></td>
+<td>N</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/path_resolution</td>
+<td></td>
+<td>Non-public test exe</td>
+<td>docs/; FIXME rename to tjr_path_resolution?</td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/tjr_mem_queue</td>
+<td></td>
+<td>Non-public src-test exe</td>
+<td>docs/</td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/tjr_net</td>
+<td></td>
+<td>Non-public bin exes</td>
+<td>docs/ dir</td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/mini-fs</td>
+<td></td>
+<td>Non-public bin exes</td>
+<td>docs; FIXME rename to tjr_minifs</td>
+</tr>
+<tr class="even">
+<td>https://github.com/tomjridge/tjr_kv</td>
+<td>Y</td>
+<td>Non-public bin exes</td>
+<td>docs/</td>
+</tr>
+<tr class="odd">
+<td>https://github.com/tomjridge/imp_fs</td>
+<td>Y</td>
+<td>Non-public src-test/ exe; non-public bin/ exes; public bin-freelist exe</td>
+<td>docs/; FIXME rename to tjr_impfs?</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h2 id="images">Images</h2>
 <figure>
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&amp;h=766" alt="" /><figcaption>B-tree layers / system structure</figcaption>
