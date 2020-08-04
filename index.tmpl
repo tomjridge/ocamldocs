@@ -9,28 +9,27 @@ import html_macros as h
 
 )
 
-# GitHub links
+## ImpFS links
 
-* <https://github.com/tomjridge/tjr_lib>
-* <https://github.com/tomjridge/tjr_profile>
-* <https://github.com/tomjridge/tjr_monad>
-* <https://github.com/tomjridge/tjr_fs_shared>
-* <https://github.com/tomjridge/tjr_plist>
-* <https://github.com/tomjridge/isa_btree>
-* <https://github.com/tomjridge/tjr_btree>
-* <https://github.com/tomjridge/tjr_lru_cache>
-* <https://github.com/tomjridge/tjr_pcache>
-* <https://github.com/tomjridge/tjr_path_resolution>
-* <https://github.com/tomjridge/tjr_mem_queue>
-* <https://github.com/tomjridge/tjr_net>
-* <https://github.com/tomjridge/tjr_minifs>
-* <https://github.com/tomjridge/tjr_kv>
-* <https://github.com/tomjridge/tjr_impfs>
+![Package dependencies / library structure](https://docs.google.com/drawings/d/e/2PACX-1vSqzipIxfOtcWhtSEqcBUpEKPVp1ALtHYyVVBldz7WNP3idcaQTY0iHoLBMf9n4vNMUjDvoIi_gr2gE/pub?w=1034&amp;h=520)
 
 
+## Travis builds
+
+* <https://travis-ci.org/github/tomjridge/tjr_lib>
+![](https://travis-ci.org/tomjridge/tjr_lib.svg?branch=master)
+
+* <https://travis-ci.org/github/tomjridge/tjr_btree> (dev branch)
+![](https://travis-ci.org/tomjridge/tjr_btree.svg?branch=dev)
+
+* <https://travis-ci.org/github/tomjridge/tjr_kv>
+![](https://travis-ci.org/tomjridge/tjr_kv.svg?branch=master)
+
+* <https://travis-ci.org/github/tomjridge/tjr_impfs>
+![](https://travis-ci.org/tomjridge/tjr_impfs.svg?branch=master)
 
 
-# ImpFS ocamldocs
+## OCamldocs
 
 $(h.link_list("""
 a_tjr_lib/tjr_lib_core/Tjr_lib_core/index.html
@@ -79,8 +78,37 @@ XXXb_tjr_plist/tjr_plist_examples/Tjr_plist_examples/index.html
 https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html
 """))
 
+# GitHub links
 
-![Package dependencies / library structure](https://docs.google.com/drawings/d/e/2PACX-1vSqzipIxfOtcWhtSEqcBUpEKPVp1ALtHYyVVBldz7WNP3idcaQTY0iHoLBMf9n4vNMUjDvoIi_gr2gE/pub?w=1034&amp;h=520)
+NOTE we should probably not have any public exes (focus on the libraries). FIXME try to remove env flags from dune files
+
+NOTE by default, Makefile all target (which is the default) should build tests; common Makefile targets: test_exes; run_tests; run_example; update_generated_doc
+
+
+
+| URL                                          | Dockerfile | Tests and examples                                           | Notes                                       |
+| -------------------------------------------- | ---------- | ------------------------------------------------------------ | ------------------------------------------- |
+| <https://github.com/tomjridge/tjr_lib>       | Y          | src-test/ non-public test_main.exe                           | has docs/;                                  |
+| https://github.com/tomjridge/tjr_profile     |            | N                                                            |                                             |
+| https://github.com/tomjridge/tjr_monad       |            | N                                                            |                                             |
+| https://github.com/tomjridge/tjr_fs_shared   |            | Disabled src-examples, src-test; non-public test exe         | docs/                                       |
+| https://github.com/tomjridge/tjr_plist       |            | Non-public test exe (disabled); disabled src-examples        |                                             |
+| https://github.com/tomjridge/isa_btree       |            | Non-public tests (not currently compiling)                   | docs/                                       |
+| https://github.com/tomjridge/tjr_btree       | Y          | src-examples (disabled FIXME);  private main+test exe in bin/ (disabled FIXME) | dev branch                                  |
+| https://github.com/tomjridge/tjr_lru_cache   |            | Non-public test exe                                          |                                             |
+| https://github.com/tomjridge/tjr_pcache      |            | N                                                            |                                             |
+| https://github.com/tomjridge/path_resolution |            | Non-public test exe                                          | docs/; FIXME rename to tjr_path_resolution? |
+| https://github.com/tomjridge/tjr_mem_queue   |            | Non-public src-test exe                                      | docs/                                       |
+| https://github.com/tomjridge/tjr_net         |            | Non-public bin exes                                          | docs/ dir                                   |
+| https://github.com/tomjridge/mini-fs         |            | Non-public bin exes                                          | docs; FIXME rename to tjr_minifs            |
+| https://github.com/tomjridge/tjr_kv          | Y          | Non-public bin exes                                          | docs/                                       |
+| https://github.com/tomjridge/imp_fs          | Y          | Non-public src-test/ exe; non-public bin/ exes; public bin-freelist exe | docs/; FIXME rename to tjr_impfs?           |
+|                                              |            |                                                              |                                             |
+
+
+
+
+## Images
 
 ![B-tree layers / system structure](https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&h=766)
 
@@ -97,7 +125,8 @@ https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html
 
 ![Used list](https://docs.google.com/drawings/d/e/2PACX-1vR3nHzNU8Nl6nffcW2R8KoUcol1HcAMNoefBtt_gleyVKNtc_315MWHdWrX3ToPgKu6Btzni84mq7KI/pub?w=1284&amp;h=501)
 
----
+
+
 
 ## Demos as Imgur animated gifs
 

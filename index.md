@@ -1,26 +1,25 @@
 
-# GitHub links
+## ImpFS links
 
-* <https://github.com/tomjridge/tjr_lib>
-* <https://github.com/tomjridge/tjr_profile>
-* <https://github.com/tomjridge/tjr_monad>
-* <https://github.com/tomjridge/tjr_fs_shared>
-* <https://github.com/tomjridge/tjr_plist>
-* <https://github.com/tomjridge/isa_btree>
-* <https://github.com/tomjridge/tjr_btree>
-* <https://github.com/tomjridge/tjr_lru_cache>
-* <https://github.com/tomjridge/tjr_pcache>
-* <https://github.com/tomjridge/tjr_path_resolution>
-* <https://github.com/tomjridge/tjr_mem_queue>
-* <https://github.com/tomjridge/tjr_net>
-* <https://github.com/tomjridge/tjr_minifs>
-* <https://github.com/tomjridge/tjr_kv>
-* <https://github.com/tomjridge/tjr_impfs>
+![Package dependencies / library structure](https://docs.google.com/drawings/d/e/2PACX-1vSqzipIxfOtcWhtSEqcBUpEKPVp1ALtHYyVVBldz7WNP3idcaQTY0iHoLBMf9n4vNMUjDvoIi_gr2gE/pub?w=1034&amp;h=520)
 
 
+## Travis builds
+
+* <https://travis-ci.org/github/tomjridge/tjr_lib>
+![](https://travis-ci.org/tomjridge/tjr_lib.svg?branch=master)
+
+* <https://travis-ci.org/github/tomjridge/tjr_btree>
+![](https://travis-ci.org/tomjridge/tjr_btree.svg?branch=dev)
+
+* <https://travis-ci.org/github/tomjridge/tjr_kv>
+![](https://travis-ci.org/tomjridge/tjr_kv.svg?branch=master)
+
+* <https://travis-ci.org/github/tomjridge/tjr_impfs>
+![](https://travis-ci.org/tomjridge/tjr_impfs.svg?branch=master)
 
 
-# ImpFS ocamldocs
+## OCamldocs
 
 * [a_tjr_lib/tjr_lib_core/Tjr_lib_core/index.html](a_tjr_lib/tjr_lib_core/Tjr_lib_core/index.html)
 * [a_tjr_lib/tjr_lib/Tjr_lib/index.html](a_tjr_lib/tjr_lib/Tjr_lib/index.html)
@@ -68,7 +67,28 @@
 * [https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html](https://libfuse.github.io/doxygen/structfuse__lowlevel__ops.html)
 
 
-![Package dependencies / library structure](https://docs.google.com/drawings/d/e/2PACX-1vSqzipIxfOtcWhtSEqcBUpEKPVp1ALtHYyVVBldz7WNP3idcaQTY0iHoLBMf9n4vNMUjDvoIi_gr2gE/pub?w=1034&amp;h=520)
+# GitHub links
+
+* <https://github.com/tomjridge/tjr_lib>
+* <https://github.com/tomjridge/tjr_profile>
+* <https://github.com/tomjridge/tjr_monad>
+* <https://github.com/tomjridge/tjr_fs_shared>
+* <https://github.com/tomjridge/tjr_plist>
+* <https://github.com/tomjridge/isa_btree>
+* <https://github.com/tomjridge/tjr_btree>
+* <https://github.com/tomjridge/tjr_lru_cache>
+* <https://github.com/tomjridge/tjr_pcache>
+* <https://github.com/tomjridge/path_resolution> FIXME rename to tjr_path_resolution?
+* <https://github.com/tomjridge/tjr_mem_queue>
+* <https://github.com/tomjridge/tjr_net>
+* <https://github.com/tomjridge/mini-fs> FIXME rename to tjr_minifs
+* <https://github.com/tomjridge/tjr_kv>
+* <https://github.com/tomjridge/imp_fs> FIXME rename to tjr_impfs?
+
+
+
+
+## Images
 
 ![B-tree layers / system structure](https://docs.google.com/drawings/d/e/2PACX-1vSbPmP9hfqwpYdJefrAYVY_7nSf6Mf5kzAXHYEaaAbw6cLwkWJH9GImYG_4KwKRDLOOjDGMvePbodwt/pub?w=1137&h=766)
 
@@ -85,7 +105,8 @@
 
 ![Used list](https://docs.google.com/drawings/d/e/2PACX-1vR3nHzNU8Nl6nffcW2R8KoUcol1HcAMNoefBtt_gleyVKNtc_315MWHdWrX3ToPgKu6Btzni84mq7KI/pub?w=1284&amp;h=501)
 
----
+
+
 
 ## Demos as Imgur animated gifs
 
